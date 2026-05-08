@@ -70,4 +70,8 @@ export const authApi = {
         })
         return data // { detail }
     },
+
+    deleteMe: async ({ password }) => {
+        await apiClient.delete('/users/me/', { data: { password } })
+    },
 }
