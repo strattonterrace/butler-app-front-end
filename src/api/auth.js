@@ -74,4 +74,9 @@ export const authApi = {
     deleteMe: async ({ password }) => {
         await apiClient.delete('/users/me/', { data: { password } })
     },
+
+    registerDriver: async (formData) => {
+        const { data } = await apiClient.post('/auth/register/driver/', formData)
+        return data // { detail, user }
+    },
 }

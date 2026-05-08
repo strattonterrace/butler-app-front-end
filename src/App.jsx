@@ -44,6 +44,7 @@ const RegisterPage = lazy(() => import('@/features/auth/RegisterPage'))
 const ForgotPasswordPage = lazy(() => import('@/features/auth/ForgotPasswordPage'))
 const SubscribePage = lazy(() => import('@/features/onboarding/SubscribePage'))
 const BecomeDriverPage = lazy(() => import('@/features/onboarding/BecomeDriverPage'))
+const DriverPendingPage = lazy(() => import('@/features/driver/DriverPendingPage'))
 const ClientDashboard = lazy(() => import('@/features/client/ClientDashboard'))
 const NewRequestPage = lazy(() => import('@/features/client/NewRequestPage'))
 const MyRequestsPage = lazy(() => import('@/features/client/MyRequestsPage'))
@@ -96,6 +97,7 @@ export default function App() {
               <Route path="/forgot-password" element={<ForgotPasswordPage />} />
               <Route path="/subscribe" element={<SubscribePage />} />
               <Route path="/become-driver" element={<BecomeDriverPage />} />
+              <Route path="/driver/pending" element={<DriverPendingPage />} />
 
               {/* App Shell (requires auth) */}
               <Route element={<AppShell />}>

@@ -32,8 +32,15 @@ export default function LoginPage() {
         setLoading(true)
         try {
             const user = await login(data.email, data.password)
+
+            // Pending drivers cannot access the driver dashboard yet
+            if (user.role === 'driver' && user.approvalStatus !== 'approved') {
+                toast.info('Application pending', { description: 'Your driver application is under review. We\'ll notify you once approved.' })
+                navigate('/driver/pending', { replace: true })
+                return
+            }
+
             toast.success('Welcome back!', { description: `Signed in as ${user.fullName}.` })
-            // Redirect to the page they were trying to reach, or their dashboard
             const from = location.state?.from?.pathname || ROLE_DASHBOARDS[user.role] || '/dashboard'
             navigate(from, { replace: true })
         } catch (error) {
