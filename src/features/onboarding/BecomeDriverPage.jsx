@@ -201,6 +201,14 @@ export default function BecomeDriverPage() {
                     <Button type="submit" size="lg" loading={loading} disabled={!form.agreed} style={{ width: '100%', height: 52, fontSize: 16 }}>
                         Submit Application
                     </Button>
+
+                    {/* Client CTA */}
+                    <div style={{ marginTop: 20, padding: '16px 20px', backgroundColor: '#111113', border: '1px solid #27272A', borderRadius: 12, textAlign: 'center' }}>
+                        <p style={{ fontSize: 13, color: '#71717A', marginBottom: 8 }}>Looking to book services instead?</p>
+                        <Link to="/register" style={{ fontSize: 14, fontWeight: 600, color: '#C9A84C', textDecoration: 'none' }}>
+                            Sign up as a client →
+                        </Link>
+                    </div>
                 </form>
             </div>
         </div>

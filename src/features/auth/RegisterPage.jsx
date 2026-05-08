@@ -17,7 +17,7 @@ export default function RegisterPage() {
 
     const { register, handleSubmit, formState: { errors } } = useForm({
         resolver: zodResolver(registerSchema),
-        defaultValues: { fullName: '', email: '', password: '', confirmPassword: '' },
+        defaultValues: { fullName: '', email: '', phone: '', password: '', confirmPassword: '' },
     })
 
     const onSubmit = async (data) => {
@@ -55,6 +55,10 @@ export default function RegisterPage() {
                             {errors.email && <p style={{ fontSize: 12, color: '#EF4444', marginTop: 4 }}>{errors.email.message}</p>}
                         </div>
                         <div>
+                            <Input type="tel" label="Phone Number" placeholder="+1 (949) 555-0000" {...register('phone')} />
+                            {errors.phone && <p style={{ fontSize: 12, color: '#EF4444', marginTop: 4 }}>{errors.phone.message}</p>}
+                        </div>
+                        <div>
                             <div style={{ position: 'relative' }}>
                                 <Input type={showPassword ? 'text' : 'password'} label="Password" placeholder="Min 8 characters" {...register('password')} />
                                 <button type="button" onClick={() => setShowPassword(!showPassword)}
@@ -76,6 +80,14 @@ export default function RegisterPage() {
                     Already have an account?{' '}
                     <Link to="/login" style={{ color: '#C9A84C', textDecoration: 'none', fontWeight: 500 }}>Sign in</Link>
                 </p>
+
+                {/* Driver CTA */}
+                <div style={{ marginTop: 16, padding: '16px 20px', backgroundColor: '#111113', border: '1px solid #27272A', borderRadius: 12, textAlign: 'center' }}>
+                    <p style={{ fontSize: 13, color: '#71717A', marginBottom: 8 }}>Want to earn money on your schedule?</p>
+                    <Link to="/become-driver" style={{ fontSize: 14, fontWeight: 600, color: '#C9A84C', textDecoration: 'none' }}>
+                        Apply to drive for Butler →
+                    </Link>
+                </div>
             </div>
         </div>
     )
