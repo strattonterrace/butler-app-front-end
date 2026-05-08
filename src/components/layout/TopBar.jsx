@@ -20,9 +20,9 @@ export function TopBar() {
     const mobile = useIsMobile()
     useEscapeKey(useCallback(() => setDropdownOpen(false), []))
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
         setDropdownOpen(false)
-        logout()
+        await logout()
         toast('Signed out', { description: 'See you next time.' })
         navigate('/login')
     }

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
@@ -7,9 +7,19 @@ import { useAuthStore } from '@/store/authStore'
 import { loginSchema } from '@/lib/validations'
 import { Button, Input } from '@/components/ui'
 import { Eye, EyeSlash } from '@phosphor-icons/react'
+import { extractErrorMessage } from '@/api/client'
+
+const ROLE_DASHBOARDS = {
+    client: '/dashboard',
+    operator: '/operator',
+    driver: '/driver',
+    admin: '/admin',
+}
 
 export default function LoginPage() {
     const { login } = useAuthStore()
+    const navigate = useNavigate()
+    const location = useLocation()
     const [showPassword, setShowPassword] = useState(false)
     const [loading, setLoading] = useState(false)
 
@@ -18,13 +28,19 @@ export default function LoginPage() {
         defaultValues: { email: '', password: '' },
     })
 
-    const onSubmit = (data) => {
+    const onSubmit = async (data) => {
         setLoading(true)
-        setTimeout(() => {
-            login('client')
+        try {
+            const user = await login(data.email, data.password)
+            toast.success('Welcome back!', { description: `Signed in as ${user.fullName}.` })
+            // Redirect to the page they were trying to reach, or their dashboard
+            const from = location.state?.from?.pathname || ROLE_DASHBOARDS[user.role] || '/dashboard'
+            navigate(from, { replace: true })
+        } catch (error) {
+            toast.error('Sign in failed', { description: extractErrorMessage(error) })
+        } finally {
             setLoading(false)
-            toast.success('Welcome back!', { description: 'Logged in successfully.' })
-        }, 800)
+        }
     }
 
     return (

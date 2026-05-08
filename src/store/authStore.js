@@ -1,76 +1,73 @@
 import { create } from 'zustand'
+import { authApi } from '@/api/auth'
+import { ACCESS_KEY, REFRESH_KEY } from '@/api/client'
 
-// Mock users for Phase 1 — switch between roles for development
-const MOCK_USERS = {
-    client: {
-        id: 'usr_001',
-        fullName: 'Jane Smith',
-        email: 'jane@example.com',
-        role: 'client',
-        phone: '+1 (949) 555-0101',
-        avatar: null,
-        status: 'active',
-        subscription: {
-            status: 'active',
-            startDate: '2026-01-15',
-            nextBilling: '2026-03-15',
-            plan: '$199/month',
-        },
-        createdAt: '2026-01-15T10:30:00Z',
+export const useAuthStore = create((set, get) => ({
+    currentUser: null,
+    isAuthenticated: false,
+    isLoading: true, // true during session restore on app mount
+
+    /**
+     * Called once on app mount. Checks localStorage for an existing session
+     * and validates it against /users/me/ before trusting it.
+     */
+    initialize: async () => {
+        const access = localStorage.getItem(ACCESS_KEY)
+        const refresh = localStorage.getItem(REFRESH_KEY)
+
+        if (!access || !refresh) {
+            set({ isLoading: false })
+            return
+        }
+
+        try {
+            const user = await authApi.me()
+            set({ currentUser: user, isAuthenticated: true, isLoading: false })
+        } catch {
+            // Tokens expired or invalid — clear and let the user log in again
+            localStorage.removeItem(ACCESS_KEY)
+            localStorage.removeItem(REFRESH_KEY)
+            set({ isLoading: false })
+        }
     },
-    operator: {
-        id: 'usr_005',
-        fullName: 'Alex Rivera',
-        email: 'alex@butler.com',
-        role: 'operator',
-        phone: '+1 (949) 555-0505',
-        avatar: null,
-        status: 'active',
-        subscription: null,
-        createdAt: '2025-12-01T09:00:00Z',
+
+    login: async (email, password) => {
+        const data = await authApi.login({ email, password })
+        localStorage.setItem(ACCESS_KEY, data.access)
+        localStorage.setItem(REFRESH_KEY, data.refresh)
+        set({ currentUser: data.user, isAuthenticated: true })
+        return data.user
     },
-    driver: {
-        id: 'usr_010',
-        fullName: 'Marcus Johnson',
-        email: 'marcus@example.com',
-        role: 'driver',
-        phone: '+1 (949) 555-1010',
-        avatar: null,
-        status: 'active',
-        subscription: null,
-        vehicle: { make: 'Toyota', model: 'Camry', year: 2022, plate: '7ABC123' },
-        availability: { days: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'], hours: 'flexible' },
-        approvalStatus: 'approved',
-        createdAt: '2026-01-20T14:00:00Z',
+
+    register: async ({ fullName, email, password, confirmPassword }) => {
+        const data = await authApi.register({ fullName, email, password, confirmPassword })
+        localStorage.setItem(ACCESS_KEY, data.access)
+        localStorage.setItem(REFRESH_KEY, data.refresh)
+        set({ currentUser: data.user, isAuthenticated: true })
+        return data.user
     },
-    admin: {
-        id: 'usr_020',
-        fullName: 'Ryan Mitchell',
-        email: 'ryan@butler.com',
-        role: 'admin',
-        phone: '+1 (949) 555-2020',
-        avatar: null,
-        status: 'active',
-        subscription: null,
-        createdAt: '2025-11-01T08:00:00Z',
+
+    logout: async () => {
+        const refresh = localStorage.getItem(REFRESH_KEY)
+        if (refresh) {
+            try {
+                await authApi.logout({ refresh })
+            } catch {
+                // Blacklisting failed (token already expired/invalid) — still clear locally
+            }
+        }
+        localStorage.removeItem(ACCESS_KEY)
+        localStorage.removeItem(REFRESH_KEY)
+        set({ currentUser: null, isAuthenticated: false })
     },
-}
 
-export const useAuthStore = create((set) => ({
-    currentUser: MOCK_USERS.client,
-    isAuthenticated: true,
-
-    login: (role) => set({
-        currentUser: MOCK_USERS[role],
-        isAuthenticated: true,
-    }),
-
-    logout: () => set({
-        currentUser: null,
-        isAuthenticated: false,
-    }),
-
-    switchRole: (role) => set({
-        currentUser: MOCK_USERS[role],
-    }),
+    setUser: (user) => set({ currentUser: user }),
 }))
+
+// The axios interceptor in client.js fires this event when the refresh token
+// is expired/invalid. We handle it here without a circular import.
+if (typeof window !== 'undefined') {
+    window.addEventListener('butler:logout', () => {
+        useAuthStore.setState({ currentUser: null, isAuthenticated: false })
+    })
+}

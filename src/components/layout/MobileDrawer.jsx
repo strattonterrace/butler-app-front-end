@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'
 import { useUIStore } from '@/store/uiStore'
-import { X } from '@phosphor-icons/react'
+import { X, Sun, Moon } from '@phosphor-icons/react'
 import {
     House, Plus, ClockCounterClockwise, Gear, Queue, ListChecks,
     UsersThree, Car, ChartBar, CreditCard,
@@ -37,10 +37,11 @@ const NAV_ITEMS = {
 }
 
 export function MobileDrawer() {
-    const { currentUser, switchRole } = useAuthStore()
-    const { mobileNavOpen, setMobileNavOpen } = useUIStore()
+    const { currentUser } = useAuthStore()
+    const { mobileNavOpen, setMobileNavOpen, theme, toggleTheme } = useUIStore()
     const role = currentUser?.role || 'client'
     const items = NAV_ITEMS[role] || NAV_ITEMS.client
+    const isLight = theme === 'light'
 
     const close = () => setMobileNavOpen(false)
 
@@ -61,8 +62,9 @@ export function MobileDrawer() {
             {/* Drawer panel */}
             <aside style={{
                 position: 'fixed', top: 0, left: 0, bottom: 0, zIndex: 50,
-                width: 280, backgroundColor: '#111113',
-                borderRight: '1px solid #27272A',
+                width: 280,
+                backgroundColor: isLight ? '#F4F4F5' : '#111113',
+                borderRight: `1px solid ${isLight ? '#D4D4D4' : '#27272A'}`,
                 transform: mobileNavOpen ? 'translateX(0)' : 'translateX(-100%)',
                 transition: 'transform 300ms cubic-bezier(0.4, 0, 0.2, 1)',
                 display: 'flex', flexDirection: 'column',
@@ -98,27 +100,27 @@ export function MobileDrawer() {
                     ))}
                 </nav>
 
-                {/* Role Switcher (dev) */}
-                <div style={{ borderTop: '1px solid #27272A', padding: 16 }}>
-                    <p style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#71717A', padding: '0 4px', marginBottom: 8 }}>Dev – Switch Role</p>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 4 }}>
-                        {['client', 'operator', 'driver', 'admin'].map((r) => (
-                            <button key={r} onClick={() => { switchRole(r); close() }}
-                                style={{
-                                    padding: '8px 8px', borderRadius: 6, fontSize: 13, fontWeight: 500,
-                                    textTransform: 'capitalize', border: 'none', cursor: 'pointer',
-                                    backgroundColor: role === r ? 'rgba(201,168,76,0.12)' : 'transparent',
-                                    color: role === r ? '#C9A84C' : '#71717A',
-                                }}
-                            >
-                                {r}
-                            </button>
-                        ))}
-                    </div>
+                {/* Theme Toggle */}
+                <div style={{ borderTop: `1px solid ${isLight ? '#D4D4D4' : '#27272A'}`, padding: 12 }}>
+                    <button
+                        onClick={() => { toggleTheme(); close() }}
+                        style={{
+                            display: 'flex', alignItems: 'center', gap: 10, width: '100%',
+                            padding: '12px 16px', borderRadius: 10, fontSize: 15, fontWeight: 500,
+                            border: 'none', cursor: 'pointer', backgroundColor: 'transparent',
+                            color: isLight ? '#78716C' : '#A1A1AA', textAlign: 'left',
+                            transition: 'all 150ms',
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = isLight ? '#E8E8E8' : 'rgba(201,168,76,0.05)'}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                    >
+                        {isLight ? <Moon size={20} weight="regular" /> : <Sun size={20} weight="regular" />}
+                        <span>{isLight ? 'Switch to Dark Mode' : 'Switch to Light Mode'}</span>
+                    </button>
                 </div>
 
                 {/* User info */}
-                <div style={{ borderTop: '1px solid #27272A', padding: 16, display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{ borderTop: `1px solid ${isLight ? '#D4D4D4' : '#27272A'}`, padding: 16, display: 'flex', alignItems: 'center', gap: 12 }}>
                     <div style={{
                         width: 36, height: 36, borderRadius: '50%', backgroundColor: '#1A1A1F',
                         border: '1px solid #27272A', display: 'flex', alignItems: 'center', justifyContent: 'center',

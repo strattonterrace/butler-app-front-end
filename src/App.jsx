@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AppShell } from '@/components/layout/AppShell'
 import { ScrollToTop } from '@/components/layout/ScrollToTop'
@@ -7,7 +7,6 @@ import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { useAuthStore } from '@/store/authStore'
 import './index.css'
 
-// Skeleton fallback for lazy pages
 function PageLoader() {
   return (
     <div style={{ padding: 32 }}>
@@ -19,7 +18,27 @@ function PageLoader() {
   )
 }
 
-// Lazy-loaded pages — each gets its own chunk, reducing initial bundle size
+// Restores session from localStorage before rendering any protected route.
+// Shows a full-page loader while the /users/me/ call is in flight.
+function AuthInitializer({ children }) {
+  const initialize = useAuthStore((s) => s.initialize)
+  const isLoading = useAuthStore((s) => s.isLoading)
+
+  useEffect(() => {
+    initialize()
+  }, [initialize])
+
+  if (isLoading) {
+    return (
+      <div style={{ minHeight: '100vh', backgroundColor: '#0A0A0B', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <PageLoader />
+      </div>
+    )
+  }
+
+  return children
+}
+
 const LoginPage = lazy(() => import('@/features/auth/LoginPage'))
 const RegisterPage = lazy(() => import('@/features/auth/RegisterPage'))
 const ForgotPasswordPage = lazy(() => import('@/features/auth/ForgotPasswordPage'))
@@ -67,56 +86,56 @@ export default function App() {
   return (
     <ErrorBoundary>
       <BrowserRouter>
-        <ScrollToTop />
-        <Suspense fallback={<PageLoader />}>
-          <Routes>
-            {/* Public */}
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-            <Route path="/subscribe" element={<SubscribePage />} />
-            <Route path="/become-driver" element={<BecomeDriverPage />} />
+        <AuthInitializer>
+          <ScrollToTop />
+          <Suspense fallback={<PageLoader />}>
+            <Routes>
+              {/* Public */}
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+              <Route path="/subscribe" element={<SubscribePage />} />
+              <Route path="/become-driver" element={<BecomeDriverPage />} />
 
-            {/* App Shell (requires auth) */}
-            <Route element={<AppShell />}>
-              {/* Root redirect */}
-              <Route path="/" element={<RoleRedirect />} />
+              {/* App Shell (requires auth) */}
+              <Route element={<AppShell />}>
+                <Route path="/" element={<RoleRedirect />} />
 
-              {/* Client */}
-              <Route path="/dashboard" element={<ClientDashboard />} />
-              <Route path="/requests/new" element={<NewRequestPage />} />
-              <Route path="/requests" element={<MyRequestsPage />} />
-              <Route path="/requests/:id" element={<RequestDetailPage />} />
-              <Route path="/settings" element={<SettingsPage />} />
+                {/* Client */}
+                <Route path="/dashboard" element={<ProtectedRoute allowedRoles={['client']}><ClientDashboard /></ProtectedRoute>} />
+                <Route path="/requests/new" element={<ProtectedRoute allowedRoles={['client']}><NewRequestPage /></ProtectedRoute>} />
+                <Route path="/requests" element={<ProtectedRoute allowedRoles={['client']}><MyRequestsPage /></ProtectedRoute>} />
+                <Route path="/requests/:id" element={<ProtectedRoute allowedRoles={['client']}><RequestDetailPage /></ProtectedRoute>} />
+                <Route path="/settings" element={<ProtectedRoute allowedRoles={['client']}><SettingsPage /></ProtectedRoute>} />
 
-              {/* Operator */}
-              <Route path="/operator" element={<OperatorDashboard />} />
-              <Route path="/operator/queue" element={<OperatorQueuePage />} />
-              <Route path="/operator/active" element={<OperatorActivePage />} />
-              <Route path="/operator/clients" element={<OperatorClientManagement />} />
-              <Route path="/operator/drivers" element={<OperatorDriverManagement />} />
+                {/* Operator */}
+                <Route path="/operator" element={<ProtectedRoute allowedRoles={['operator']}><OperatorDashboard /></ProtectedRoute>} />
+                <Route path="/operator/queue" element={<ProtectedRoute allowedRoles={['operator']}><OperatorQueuePage /></ProtectedRoute>} />
+                <Route path="/operator/active" element={<ProtectedRoute allowedRoles={['operator']}><OperatorActivePage /></ProtectedRoute>} />
+                <Route path="/operator/clients" element={<ProtectedRoute allowedRoles={['operator']}><OperatorClientManagement /></ProtectedRoute>} />
+                <Route path="/operator/drivers" element={<ProtectedRoute allowedRoles={['operator']}><OperatorDriverManagement /></ProtectedRoute>} />
 
-              {/* Driver */}
-              <Route path="/driver" element={<DriverDashboard />} />
-              <Route path="/driver/tasks" element={<DriverTasksPage />} />
-              <Route path="/driver/tasks/:id" element={<TaskDetailPage />} />
-              <Route path="/driver/completed" element={<DriverCompletedPage />} />
-              <Route path="/driver/settings" element={<DriverSettingsPage />} />
+                {/* Driver */}
+                <Route path="/driver" element={<ProtectedRoute allowedRoles={['driver']}><DriverDashboard /></ProtectedRoute>} />
+                <Route path="/driver/tasks" element={<ProtectedRoute allowedRoles={['driver']}><DriverTasksPage /></ProtectedRoute>} />
+                <Route path="/driver/tasks/:id" element={<ProtectedRoute allowedRoles={['driver']}><TaskDetailPage /></ProtectedRoute>} />
+                <Route path="/driver/completed" element={<ProtectedRoute allowedRoles={['driver']}><DriverCompletedPage /></ProtectedRoute>} />
+                <Route path="/driver/settings" element={<ProtectedRoute allowedRoles={['driver']}><DriverSettingsPage /></ProtectedRoute>} />
 
-              {/* Admin */}
-              <Route path="/admin" element={<AdminDashboard />} />
-              <Route path="/admin/users" element={<AdminUsersPage />} />
-              <Route path="/admin/requests" element={<AdminRequestsPage />} />
-              <Route path="/admin/drivers" element={<AdminDriversPage />} />
-              <Route path="/admin/subscriptions" element={<AdminSubscriptionsPage />} />
-              <Route path="/admin/revenue" element={<AdminRevenuePage />} />
-              <Route path="/admin/settings" element={<AdminSettingsPage />} />
-            </Route>
+                {/* Admin */}
+                <Route path="/admin" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
+                <Route path="/admin/users" element={<ProtectedRoute allowedRoles={['admin']}><AdminUsersPage /></ProtectedRoute>} />
+                <Route path="/admin/requests" element={<ProtectedRoute allowedRoles={['admin']}><AdminRequestsPage /></ProtectedRoute>} />
+                <Route path="/admin/drivers" element={<ProtectedRoute allowedRoles={['admin']}><AdminDriversPage /></ProtectedRoute>} />
+                <Route path="/admin/subscriptions" element={<ProtectedRoute allowedRoles={['admin']}><AdminSubscriptionsPage /></ProtectedRoute>} />
+                <Route path="/admin/revenue" element={<ProtectedRoute allowedRoles={['admin']}><AdminRevenuePage /></ProtectedRoute>} />
+                <Route path="/admin/settings" element={<ProtectedRoute allowedRoles={['admin']}><AdminSettingsPage /></ProtectedRoute>} />
+              </Route>
 
-            {/* 404 */}
-            <Route path="*" element={<NotFoundPage />} />
-          </Routes>
-        </Suspense>
+              <Route path="*" element={<NotFoundPage />} />
+            </Routes>
+          </Suspense>
+        </AuthInitializer>
       </BrowserRouter>
     </ErrorBoundary>
   )

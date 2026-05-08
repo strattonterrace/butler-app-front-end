@@ -3,11 +3,14 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
+import { useAuthStore } from '@/store/authStore'
 import { registerSchema } from '@/lib/validations'
 import { Button, Input } from '@/components/ui'
 import { Eye, EyeSlash } from '@phosphor-icons/react'
+import { extractErrorMessage } from '@/api/client'
 
 export default function RegisterPage() {
+    const { register: registerUser } = useAuthStore()
     const navigate = useNavigate()
     const [showPassword, setShowPassword] = useState(false)
     const [loading, setLoading] = useState(false)
@@ -17,13 +20,17 @@ export default function RegisterPage() {
         defaultValues: { fullName: '', email: '', password: '', confirmPassword: '' },
     })
 
-    const onSubmit = () => {
+    const onSubmit = async (data) => {
         setLoading(true)
-        setTimeout(() => {
-            setLoading(false)
+        try {
+            await registerUser(data)
             toast.success('Account created!', { description: 'Choose your subscription plan next.' })
             navigate('/subscribe')
-        }, 800)
+        } catch (error) {
+            toast.error('Registration failed', { description: extractErrorMessage(error) })
+        } finally {
+            setLoading(false)
+        }
     }
 
     return (

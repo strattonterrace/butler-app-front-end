@@ -4,7 +4,7 @@ import { useUIStore } from '@/store/uiStore'
 import { cn } from '@/lib/utils'
 import {
     House, Plus, ClockCounterClockwise, Gear, Queue, ListChecks,
-    UsersThree, Car, ChartBar, CreditCard, CaretLeft,
+    UsersThree, Car, ChartBar, CreditCard, CaretLeft, Sun, Moon,
 } from '@phosphor-icons/react'
 
 const NAV_ITEMS = {
@@ -37,10 +37,11 @@ const NAV_ITEMS = {
 }
 
 export function Sidebar() {
-    const { currentUser, switchRole } = useAuthStore()
-    const { sidebarCollapsed, toggleSidebar } = useUIStore()
+    const { currentUser } = useAuthStore()
+    const { sidebarCollapsed, toggleSidebar, theme, toggleTheme } = useUIStore()
     const role = currentUser?.role || 'client'
     const items = NAV_ITEMS[role] || NAV_ITEMS.client
+    const isLight = theme === 'light'
 
     return (
         <aside className={cn('app-sidebar', sidebarCollapsed ? 'app-sidebar--collapsed' : 'app-sidebar--expanded')}>
@@ -72,27 +73,30 @@ export function Sidebar() {
                 ))}
             </nav>
 
-            {/* Role Switcher */}
-            {!sidebarCollapsed && (
-                <div style={{ borderTop: '1px solid #27272A', padding: 16 }}>
-                    <p style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#71717A', padding: '0 12px', marginBottom: 8 }}>Dev – Switch Role</p>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 4 }}>
-                        {['client', 'operator', 'driver', 'admin'].map((r) => (
-                            <button key={r} onClick={() => switchRole(r)}
-                                style={{
-                                    padding: '6px 8px', borderRadius: 6, fontSize: 12, fontWeight: 500,
-                                    textTransform: 'capitalize', border: 'none', cursor: 'pointer',
-                                    backgroundColor: role === r ? 'rgba(201,168,76,0.12)' : 'transparent',
-                                    color: role === r ? '#C9A84C' : '#71717A',
-                                    transition: 'all 150ms',
-                                }}
-                            >
-                                {r}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            )}
+            {/* Theme Toggle */}
+            <div style={{ borderTop: '1px solid #27272A', padding: 12 }}>
+                <button
+                    onClick={toggleTheme}
+                    title={isLight ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
+                    style={{
+                        display: 'flex', alignItems: 'center', gap: 8, width: '100%',
+                        padding: '8px 16px', borderRadius: 8, fontSize: 14, border: 'none',
+                        cursor: 'pointer', backgroundColor: 'transparent',
+                        color: isLight ? '#78716C' : '#71717A',
+                        justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
+                        transition: 'all 150ms',
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = isLight ? '#E8E8E8' : '#1A1A1F'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                >
+                    {isLight
+                        ? <Moon size={16} weight="bold" />
+                        : <Sun size={16} weight="bold" />}
+                    {!sidebarCollapsed && (
+                        <span>{isLight ? 'Dark Mode' : 'Light Mode'}</span>
+                    )}
+                </button>
+            </div>
 
             {/* Collapse */}
             <div style={{ borderTop: '1px solid #27272A', padding: 12 }}>
