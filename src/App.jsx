@@ -39,6 +39,7 @@ function AuthInitializer({ children }) {
   return children
 }
 
+const LandingPage = lazy(() => import('@/features/landing/LandingPage'))
 const LoginPage = lazy(() => import('@/features/auth/LoginPage'))
 const RegisterPage = lazy(() => import('@/features/auth/RegisterPage'))
 const ForgotPasswordPage = lazy(() => import('@/features/auth/ForgotPasswordPage'))
@@ -91,6 +92,9 @@ export default function App() {
           <ScrollToTop />
           <Suspense fallback={<PageLoader />}>
             <Routes>
+              {/* Landing */}
+              <Route path="/" element={<LandingPage />} />
+
               {/* Public */}
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
@@ -101,7 +105,7 @@ export default function App() {
 
               {/* App Shell (requires auth) */}
               <Route element={<AppShell />}>
-                <Route path="/" element={<RoleRedirect />} />
+                <Route path="/app" element={<RoleRedirect />} />
 
                 {/* Client */}
                 <Route path="/dashboard" element={<ProtectedRoute allowedRoles={['client']}><ClientDashboard /></ProtectedRoute>} />
