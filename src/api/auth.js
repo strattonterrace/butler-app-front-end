@@ -18,10 +18,11 @@
 import apiClient from './client'
 
 export const authApi = {
-    register: async ({ fullName, email, password, confirmPassword }) => {
+    register: async ({ fullName, email, phone, password, confirmPassword }) => {
         const { data } = await apiClient.post('/auth/register/', {
             fullName,
             email,
+            phone,
             password,
             confirmPassword,
         })
@@ -78,5 +79,12 @@ export const authApi = {
     registerDriver: async (formData) => {
         const { data } = await apiClient.post('/auth/register/driver/', formData)
         return data // { detail, user }
+    },
+
+    completeOnboarding: async ({ territoryId, address = '', preferredServices = [] }) => {
+        const { data } = await apiClient.post('/auth/onboarding/', {
+            territoryId, address, preferredServices,
+        })
+        return data // updated UserSerializer
     },
 }

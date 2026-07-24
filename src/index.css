@@ -81,6 +81,159 @@ html {
   color-scheme: dark;
 }
 
+/* ── Light Mode (Ryan's Option B — Apple-style) ── */
+html.light {
+  background-color: #FAFAF9 !important;
+  color-scheme: light;
+
+  /* Remap surface colours */
+  --color-surface-0: #FAFAF9;
+  --color-surface-1: #F4F4F5;
+  --color-surface-2: #EFEFEF;
+  --color-surface-3: #E8E8E8;
+  --color-surface-4: #E0E0E0;
+
+  /* Text */
+  --color-ink-1: #1C1917;
+  --color-ink-2: #44403C;
+  --color-ink-3: #78716C;
+  --color-ink-4: #A8A29E;
+
+  /* Borders */
+  --color-edge-1: #D4D4D4;
+  --color-edge-2: #E5E5E5;
+
+  /* Gold stays the same — it works on both themes */
+  --color-gold: #B8860B;
+  --color-gold-light: #C9A84C;
+}
+
+html.light body {
+  background-color: #FAFAF9 !important;
+  color: #1C1917;
+}
+
+/* ── Light mode: global text color inheritance ──
+   Headings and paragraphs inside the main content area inherit
+   a dark color so hardcoded white (#F5F5F4) inline styles are
+   overridden. Gold, status, and muted colors are explicitly kept. */
+html.light .app-main {
+  color: #1C1917;
+}
+
+html.light .app-main h1,
+html.light .app-main h2,
+html.light .app-main h3,
+html.light .app-main h4,
+html.light .app-main h5,
+html.light .app-main p,
+html.light .app-main span:not([class]),
+html.light .app-main label {
+  color: inherit;
+}
+
+/* heading-1 uses Instrument Serif — flip to dark */
+html.light .heading-1 { color: #1C1917; }
+html.light .heading-2 { color: #1C1917; }
+html.light .body-text  { color: #44403C; }
+html.light .muted-text { color: #78716C; }
+html.light .label-text { color: #78716C; }
+
+/* Sidebar text in light mode */
+html.light .app-sidebar a,
+html.light .app-sidebar button,
+html.light .app-sidebar p,
+html.light .app-sidebar span {
+  color: #44403C;
+}
+
+/* User avatar circles */
+html.light .app-sidebar [style*="background-color"] {
+  background-color: #EBEBEB;
+}
+
+/* ─────────────────────────────────────────────────────
+   LIGHT MODE — Global overrides for common dark patterns
+   These catch remaining pages without touching each file
+   ─────────────────────────────────────────────────────*/
+
+/* All native inputs and selects not handled by Input.jsx */
+html.light input:not([type="checkbox"]):not([type="radio"]),
+html.light textarea,
+html.light select {
+  background-color: #F4F4F5 !important;
+  border-color: #D4D4D4 !important;
+  color: #1C1917 !important;
+}
+html.light input::placeholder,
+html.light textarea::placeholder {
+  color: #A8A29E !important;
+}
+
+/* Table containers — the outer dark card wrapping every table */
+html.light .responsive-table,
+html.light table {
+  color: #1C1917;
+}
+html.light thead tr {
+  background-color: #F0F0F0 !important;
+}
+html.light thead th {
+  color: #78716C !important;
+  border-bottom: 1px solid #E4E4E7 !important;
+}
+html.light tbody tr {
+  border-bottom: 1px solid #F0F0F0 !important;
+}
+html.light tbody tr:hover {
+  background-color: #F8F8F8 !important;
+}
+html.light tbody td {
+  color: #1C1917 !important;
+}
+
+/* Table outer wrapper div — catches the dark rounded container */
+html.light .app-main [style*="overflow: hidden"][style*="border-radius"],
+html.light .app-main [style*="overflow:hidden"][style*="border-radius"] {
+  background-color: #FFFFFF !important;
+  border-color: #E4E4E7 !important;
+}
+
+/* Tab / filter bar containers */
+html.light .app-main [style*="overflow: hidden"][style*="border-radius: 10"],
+html.light .app-main [style*="overflow:hidden"][style*="border-radius: 10"] {
+  background-color: #F4F4F5 !important;
+  border-color: #D4D4D4 !important;
+}
+
+
+html.light .app-shell {
+  background: #FAFAF9;
+}
+
+html.light .app-sidebar {
+  background: #F4F4F5;
+  border-right: 1px solid #D4D4D4;
+}
+
+html.light .app-topbar {
+  background: rgba(250, 250, 249, 0.90);
+  border-bottom: 1px solid #D4D4D4;
+}
+
+html.light .mobile-nav {
+  background: rgba(244, 244, 245, 0.97);
+  border-top: 1px solid #D4D4D4;
+}
+
+html.light ::-webkit-scrollbar-thumb {
+  background: #D4D4D4;
+}
+
+html.light ::-webkit-scrollbar-thumb:hover {
+  background: #A8A29E;
+}
+
 body {
   font-family: var(--font-sans);
   background-color: #0A0A0B !important;
@@ -88,6 +241,7 @@ body {
   line-height: 1.6;
   min-height: 100vh;
 }
+
 
 /* ── Scrollbar ── */
 ::-webkit-scrollbar {

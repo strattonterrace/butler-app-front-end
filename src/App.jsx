@@ -41,7 +41,7 @@ function AuthInitializer({ children }) {
 
 const LandingPage = lazy(() => import('@/features/landing/LandingPage'))
 const LoginPage = lazy(() => import('@/features/auth/LoginPage'))
-const RegisterPage = lazy(() => import('@/features/auth/RegisterPage'))
+const OnboardingFlow = lazy(() => import('@/features/onboarding/OnboardingFlow'))
 const ForgotPasswordPage = lazy(() => import('@/features/auth/ForgotPasswordPage'))
 const SubscribePage = lazy(() => import('@/features/onboarding/SubscribePage'))
 const BecomeDriverPage = lazy(() => import('@/features/onboarding/BecomeDriverPage'))
@@ -97,7 +97,7 @@ export default function App() {
 
               {/* Public */}
               <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<RegisterPage />} />
+              <Route path="/register" element={<OnboardingFlow />} />
               <Route path="/forgot-password" element={<ForgotPasswordPage />} />
               <Route path="/subscribe" element={<SubscribePage />} />
               <Route path="/become-driver" element={<BecomeDriverPage />} />

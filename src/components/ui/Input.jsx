@@ -1,35 +1,35 @@
 import { forwardRef } from 'react'
 import { useIsMobile } from '@/hooks/useEdgeCases'
-
-const labelStyle = {
-    display: 'block', fontSize: 14, fontWeight: 500, color: '#A1A1AA',
-    marginBottom: 6,
-}
+import { useUIStore } from '@/store/uiStore'
 
 const errorStyle = { fontSize: 12, color: '#EF4444', marginTop: 4 }
 
 const Input = forwardRef(({ type = 'text', label, error, style, ...props }, ref) => {
     const mobile = useIsMobile()
+    const { theme } = useUIStore()
+    const isLight = theme === 'light'
+
     const inputStyle = {
         display: 'flex', width: '100%', height: mobile ? 38 : 44, borderRadius: mobile ? 8 : 10,
-        border: '1px solid #27272A', backgroundColor: '#1E1E24',
-        padding: mobile ? '0 12px' : '0 14px', fontSize: mobile ? 13 : 14, color: '#F5F5F4',
-        outline: 'none', transition: 'border-color 150ms ease',
-        fontFamily: 'inherit',
+        border: `1px solid ${isLight ? '#D4D4D4' : '#27272A'}`,
+        backgroundColor: isLight ? '#F4F4F5' : '#1E1E24',
+        padding: mobile ? '0 12px' : '0 14px', fontSize: mobile ? 13 : 14,
+        color: isLight ? '#1C1917' : '#F5F5F4',
+        outline: 'none', transition: 'border-color 150ms ease', fontFamily: 'inherit',
+    }
+    const labelStyle = {
+        display: 'block', fontSize: mobile ? 13 : 14, fontWeight: 500,
+        color: isLight ? '#44403C' : '#A1A1AA', marginBottom: 6,
     }
     return (
         <div style={{ marginBottom: 0 }}>
-            {label && <label style={{ ...labelStyle, fontSize: mobile ? 13 : 14 }}>{label}</label>}
+            {label && <label style={labelStyle}>{label}</label>}
             <input
                 type={type}
                 ref={ref}
-                style={{
-                    ...inputStyle,
-                    borderColor: error ? '#EF4444' : '#27272A',
-                    ...style,
-                }}
+                style={{ ...inputStyle, borderColor: error ? '#EF4444' : (isLight ? '#D4D4D4' : '#27272A'), ...style }}
                 onFocus={(e) => { e.target.style.borderColor = error ? '#EF4444' : '#C9A84C'; e.target.style.boxShadow = `0 0 0 3px ${error ? 'rgba(239,68,68,0.15)' : 'rgba(201,168,76,0.15)'}` }}
-                onBlur={(e) => { e.target.style.borderColor = error ? '#EF4444' : '#27272A'; e.target.style.boxShadow = 'none' }}
+                onBlur={(e) => { e.target.style.borderColor = error ? '#EF4444' : (isLight ? '#D4D4D4' : '#27272A'); e.target.style.boxShadow = 'none' }}
                 {...props}
             />
             {error && <p style={errorStyle}>{error}</p>}
@@ -40,25 +40,31 @@ Input.displayName = 'Input'
 
 const Textarea = forwardRef(({ label, error, rows = 4, style, ...props }, ref) => {
     const mobile = useIsMobile()
+    const { theme } = useUIStore()
+    const isLight = theme === 'light'
+
     const inputStyle = {
         display: 'flex', width: '100%', borderRadius: mobile ? 8 : 10,
-        border: '1px solid #27272A', backgroundColor: '#1E1E24',
-        padding: mobile ? '8px 12px' : '10px 14px', fontSize: mobile ? 13 : 14, color: '#F5F5F4',
+        border: `1px solid ${isLight ? '#D4D4D4' : '#27272A'}`,
+        backgroundColor: isLight ? '#F4F4F5' : '#1E1E24',
+        padding: mobile ? '8px 12px' : '10px 14px', fontSize: mobile ? 13 : 14,
+        color: isLight ? '#1C1917' : '#F5F5F4',
         outline: 'none', transition: 'border-color 150ms ease',
         fontFamily: 'inherit', height: 'auto', resize: 'none',
     }
+    const labelStyle = {
+        display: 'block', fontSize: mobile ? 13 : 14, fontWeight: 500,
+        color: isLight ? '#44403C' : '#A1A1AA', marginBottom: 6,
+    }
     return (
         <div style={{ marginBottom: 0 }}>
-            {label && <label style={{ ...labelStyle, fontSize: mobile ? 13 : 14 }}>{label}</label>}
+            {label && <label style={labelStyle}>{label}</label>}
             <textarea
                 rows={rows}
                 ref={ref}
-                style={{
-                    ...inputStyle,
-                    borderColor: error ? '#EF4444' : '#27272A', ...style,
-                }}
+                style={{ ...inputStyle, borderColor: error ? '#EF4444' : (isLight ? '#D4D4D4' : '#27272A'), ...style }}
                 onFocus={(e) => { e.target.style.borderColor = error ? '#EF4444' : '#C9A84C'; e.target.style.boxShadow = `0 0 0 3px ${error ? 'rgba(239,68,68,0.15)' : 'rgba(201,168,76,0.15)'}` }}
-                onBlur={(e) => { e.target.style.borderColor = error ? '#EF4444' : '#27272A'; e.target.style.boxShadow = 'none' }}
+                onBlur={(e) => { e.target.style.borderColor = error ? '#EF4444' : (isLight ? '#D4D4D4' : '#27272A'); e.target.style.boxShadow = 'none' }}
                 {...props}
             />
             {error && <p style={errorStyle}>{error}</p>}

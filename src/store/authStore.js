@@ -39,8 +39,8 @@ export const useAuthStore = create((set, get) => ({
         return data.user
     },
 
-    register: async ({ fullName, email, password, confirmPassword }) => {
-        const data = await authApi.register({ fullName, email, password, confirmPassword })
+    register: async ({ fullName, email, phone, password, confirmPassword }) => {
+        const data = await authApi.register({ fullName, email, phone, password, confirmPassword })
         localStorage.setItem(ACCESS_KEY, data.access)
         localStorage.setItem(REFRESH_KEY, data.refresh)
         set({ currentUser: data.user, isAuthenticated: true })

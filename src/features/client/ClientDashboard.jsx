@@ -1,10 +1,14 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
+import { toast } from 'sonner'
+import { authApi } from '@/api/auth'
+import { requestsApi } from '@/api/requests'
+import { extractErrorMessage } from '@/api/client'
 import { useAuthStore } from '@/store/authStore'
+import { useUIStore } from '@/store/uiStore'
 import { Badge, Button, Card, SkeletonCard } from '@/components/ui'
 import { PageTransition, FadeIn, StaggerContainer, StaggerItem } from '@/components/motion/Animations'
 import { getGreeting, formatDate, SERVICE_TYPES } from '@/lib/utils'
-import { MOCK_REQUESTS } from '@/mock/data'
 import { useIsMobile } from '@/hooks/useEdgeCases'
 import { Plus, ArrowRight, CalendarBlank, MapPin, Basket, Pill, TShirt, Package, ArrowUUpLeft, CookingPot } from '@phosphor-icons/react'
 
@@ -13,10 +17,16 @@ const STATUS_BADGE = { submitted: 'gold', reviewed: 'info', assigned: 'purple', 
 const STATUS_LABEL = { submitted: 'Submitted', reviewed: 'Reviewed', assigned: 'Assigned', in_progress: 'In Progress', completed: 'Completed', closed: 'Closed', cancelled: 'Cancelled' }
 
 function StatsCard({ label, value, subtext, mobile }) {
+    const { theme } = useUIStore()
+    const isLight = theme === 'light'
     return (
-        <div style={{ backgroundColor: '#111113', border: '1px solid #27272A', borderRadius: mobile ? 12 : 14, padding: mobile ? '12px 14px' : '16px 20px' }}>
+        <div style={{
+            backgroundColor: isLight ? '#FFFFFF' : '#111113',
+            border: `1px solid ${isLight ? '#E4E4E7' : '#27272A'}`,
+            borderRadius: mobile ? 12 : 14, padding: mobile ? '12px 14px' : '16px 20px'
+        }}>
             <p style={{ fontSize: mobile ? 11 : 13, color: '#71717A', marginBottom: mobile ? 2 : 4 }}>{label}</p>
-            <p style={{ fontSize: mobile ? 20 : 28, fontWeight: 700, color: '#F5F5F4', lineHeight: 1.1 }}>{value}</p>
+            <p style={{ fontSize: mobile ? 20 : 28, fontWeight: 700, color: isLight ? '#1C1917' : '#F5F5F4', lineHeight: 1.1 }}>{value}</p>
             {subtext && <p style={{ fontSize: mobile ? 10 : 12, color: '#71717A', marginTop: mobile ? 2 : 4 }}>{subtext}</p>}
         </div>
     )
@@ -24,19 +34,23 @@ function StatsCard({ label, value, subtext, mobile }) {
 
 function RequestCard({ request }) {
     const ServiceIcon = SERVICE_ICONS[request.serviceType] || Basket
+    const { theme } = useUIStore()
+    const isLight = theme === 'light'
     return (
         <Link to={`/requests/${request.id}`} style={{ textDecoration: 'none' }}>
             <Card interactive>
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 12 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                         <div style={{
-                            width: 40, height: 40, borderRadius: 10, backgroundColor: '#1A1A1F',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#A1A1AA',
+                            width: 40, height: 40, borderRadius: 10,
+                            backgroundColor: isLight ? '#F4F4F5' : '#1A1A1F',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            color: isLight ? '#44403C' : '#A1A1AA',
                         }}>
                             <ServiceIcon size={20} weight="regular" />
                         </div>
                         <div>
-                            <p style={{ fontSize: 14, fontWeight: 600, color: '#F5F5F4' }}>{request.title}</p>
+                            <p style={{ fontSize: 14, fontWeight: 600, color: isLight ? '#1C1917' : '#F5F5F4' }}>{request.title}</p>
                             <p style={{ fontSize: 12, color: '#71717A' }}>{SERVICE_TYPES[request.serviceType]?.label}</p>
                         </div>
                     </div>
@@ -47,11 +61,11 @@ function RequestCard({ request }) {
                     <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><CalendarBlank size={13} />{formatDate(request.createdAt, { format: 'relative' })}</span>
                 </div>
                 {request.driverName && !['completed', 'cancelled'].includes(request.status) && (
-                    <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid #1F1F23', display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <div style={{ width: 24, height: 24, borderRadius: '50%', backgroundColor: '#1A1A1F', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 600, color: '#A1A1AA' }}>
+                    <div style={{ marginTop: 12, paddingTop: 12, borderTop: `1px solid ${isLight ? '#F0F0F0' : '#1F1F23'}`, display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <div style={{ width: 24, height: 24, borderRadius: '50%', backgroundColor: isLight ? '#F4F4F5' : '#1A1A1F', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 600, color: isLight ? '#44403C' : '#A1A1AA' }}>
                             {request.driverName.split(' ').map(n => n[0]).join('')}
                         </div>
-                        <span style={{ fontSize: 12, color: '#A1A1AA' }}>{request.driverName}</span>
+                        <span style={{ fontSize: 12, color: isLight ? '#44403C' : '#A1A1AA' }}>{request.driverName}</span>
                     </div>
                 )}
             </Card>
@@ -76,17 +90,40 @@ const myDashSkeleton = (
 )
 
 export default function ClientDashboard() {
-    const { currentUser } = useAuthStore()
+    const { currentUser, setUser } = useAuthStore()
     const [loading, setLoading] = useState(true)
+    const [myRequests, setMyRequests] = useState([])
+    const [searchParams, setSearchParams] = useSearchParams()
     const mobile = useIsMobile()
 
-    useEffect(() => { const t = setTimeout(() => setLoading(false), 600); return () => clearTimeout(t) }, [])
+    // The backend already scopes /requests/ to the authenticated client via
+    // visible_to(), so no client-side owner filtering is needed.
+    useEffect(() => {
+        let active = true
+        requestsApi.list({ ordering: '-created_at' })
+            .then((data) => { if (active) setMyRequests(data.results ?? []) })
+            .catch((error) => {
+                if (active) toast.error('Could not load your requests', { description: extractErrorMessage(error) })
+            })
+            .finally(() => { if (active) setLoading(false) })
+        return () => { active = false }
+    }, [])
+
+    // Landing spot for Stripe Checkout's success redirect — celebrate, then
+    // re-fetch the user so the fresh subscription status is in the store.
+    useEffect(() => {
+        if (searchParams.get('subscription') !== 'success') return
+        setSearchParams({}, { replace: true })
+        toast.success('Welcome to Butler Premium! 🎉', {
+            description: 'Your membership is active. Submit your first request whenever you\'re ready.',
+        })
+        authApi.me().then(setUser).catch(() => { /* webhook may lag a moment; next load catches up */ })
+    }, [searchParams, setSearchParams, setUser])
 
     if (loading) return myDashSkeleton
 
     const firstName = currentUser?.fullName?.split(' ')[0] || 'there'
     const greeting = getGreeting()
-    const myRequests = MOCK_REQUESTS.filter(r => r.clientId === currentUser?.id)
     const activeRequests = myRequests.filter(r => ['submitted', 'reviewed', 'assigned', 'in_progress'].includes(r.status))
     const recentCompleted = myRequests.filter(r => r.status === 'completed').slice(0, 3)
 

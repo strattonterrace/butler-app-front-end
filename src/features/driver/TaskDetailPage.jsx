@@ -1,12 +1,13 @@
-import { useState, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Badge, Button, Card } from '@/components/ui'
+import { Badge, Button, Card, SkeletonCard } from '@/components/ui'
 import { Textarea } from '@/components/ui/Input'
 import { toast } from 'sonner'
+import { requestsApi } from '@/api/requests'
+import { extractErrorMessage } from '@/api/client'
 import { formatDate, SERVICE_TYPES } from '@/lib/utils'
-import { MOCK_REQUESTS } from '@/mock/data'
-import { usePageTitle, useIsMobile } from '@/hooks/useEdgeCases'
-import { ArrowLeft, MapPin, CalendarBlank, Clock, User, Car, Play, CheckCircle, Basket, Pill, TShirt, Package, ArrowUUpLeft, CookingPot, ChatDots, Phone, Camera, Image } from '@phosphor-icons/react'
+import { usePageTitle } from '@/hooks/useEdgeCases'
+import { ArrowLeft, MapPin, CalendarBlank, Play, CheckCircle, Basket, Pill, TShirt, Package, ArrowUUpLeft, CookingPot, Phone } from '@phosphor-icons/react'
 
 const SERVICE_ICONS = { grocery: Basket, pharmacy: Pill, dry_cleaning: TShirt, package: Package, retail_return: ArrowUUpLeft, food_pickup: CookingPot }
 const STATUS_BADGE = { assigned: 'purple', in_progress: 'warning', completed: 'success' }
@@ -15,17 +16,55 @@ const STATUS_LABEL = { assigned: 'Assigned', in_progress: 'In Progress', complet
 export default function TaskDetailPage() {
     const { id } = useParams()
     const navigate = useNavigate()
-    const mobile = useIsMobile()
+    const [task, setTask] = useState(null)
+    const [loading, setLoading] = useState(true)
+    const [busy, setBusy] = useState(false)
     const [showCompletion, setShowCompletion] = useState(false)
     const [completionNotes, setCompletionNotes] = useState('')
     const [confirmed, setConfirmed] = useState(false)
     const [completed, setCompleted] = useState(false)
-    const [proofFile, setProofFile] = useState(null)
-    const fileInputRef = useRef(null)
 
-    const task = MOCK_REQUESTS.find(r => r.id === id)
     usePageTitle(task ? task.title : 'Task Detail')
     const ServiceIcon = SERVICE_ICONS[task?.serviceType] || Basket
+
+    useEffect(() => {
+        let active = true
+        setLoading(true)
+        requestsApi.get(id)
+            .then((data) => { if (active) setTask(data) })
+            .catch(() => { if (active) setTask(null) })
+            .finally(() => { if (active) setLoading(false) })
+        return () => { active = false }
+    }, [id])
+
+    const startTask = async () => {
+        setBusy(true)
+        try {
+            const updated = await requestsApi.transition(id, { status: 'in_progress' })
+            setTask(updated)
+            toast.success('Task started')
+        } catch (error) {
+            toast.error('Could not start task', { description: extractErrorMessage(error) })
+        } finally {
+            setBusy(false)
+        }
+    }
+
+    const submitCompletion = async () => {
+        setBusy(true)
+        try {
+            await requestsApi.transition(id, { status: 'completed', completionNotes: completionNotes.trim() })
+            setCompleted(true)
+        } catch (error) {
+            toast.error('Could not complete task', { description: extractErrorMessage(error) })
+        } finally {
+            setBusy(false)
+        }
+    }
+
+    if (loading) {
+        return <div style={{ maxWidth: 700, margin: '0 auto' }}><SkeletonCard lines={4} /></div>
+    }
 
     if (!task) {
         return (
@@ -53,6 +92,10 @@ export default function TaskDetailPage() {
         )
     }
 
+    // Detail serializer: client is a nested { fullName, phone, ... } object.
+    const client = task.client || {}
+    const clientName = client.fullName || 'Client'
+
     return (
         <div style={{ maxWidth: 700, margin: '0 auto' }}>
             <button onClick={() => navigate(-1)} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 14, color: '#71717A', background: 'none', border: 'none', cursor: 'pointer', marginBottom: 24, padding: 0 }}>
@@ -69,7 +112,7 @@ export default function TaskDetailPage() {
                         <div>
                             <h1 style={{ fontSize: 22, fontWeight: 600, color: '#F5F5F4', marginBottom: 4 }}>{task.title}</h1>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                <span style={{ fontSize: 13, color: '#71717A' }}>{SERVICE_TYPES[task.serviceType]?.label} · for {task.clientName}</span>
+                                <span style={{ fontSize: 13, color: '#71717A' }}>{SERVICE_TYPES[task.serviceType]?.label} · for {clientName}</span>
                                 <Badge variant={STATUS_BADGE[task.status]} size="sm">{STATUS_LABEL[task.status]}</Badge>
                             </div>
                         </div>
@@ -121,31 +164,27 @@ export default function TaskDetailPage() {
                 <h3 className="heading-2" style={{ marginBottom: 12 }}>Client</h3>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
                     <div style={{ width: 40, height: 40, borderRadius: '50%', backgroundColor: '#1A1A1F', border: '1px solid #27272A', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 600, color: '#A1A1AA' }}>
-                        {task.clientName.split(' ').map(n => n[0]).join('')}
+                        {clientName.split(' ').map(n => n[0]).join('')}
                     </div>
                     <div>
-                        <p style={{ fontSize: 14, fontWeight: 500, color: '#F5F5F4' }}>{task.clientName}</p>
+                        <p style={{ fontSize: 14, fontWeight: 500, color: '#F5F5F4' }}>{clientName}</p>
                         <p style={{ fontSize: 12, color: '#71717A' }}>Client</p>
                     </div>
                 </div>
-                {!['completed', 'cancelled'].includes(task.status) && (
+                {client.phone && !['completed', 'cancelled'].includes(task.status) && (
                     <div style={{ display: 'flex', gap: 8, paddingTop: 12, borderTop: '1px solid #1F1F23' }}>
-                        <button onClick={() => toast.info('Message sent', { description: `Message to ${task.clientName}` })}
-                            style={{ flex: 1, height: 34, borderRadius: 8, border: '1px solid #27272A', backgroundColor: '#1A1A1F', color: '#A1A1AA', fontSize: 12, fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-                            <ChatDots size={14} /> Message
-                        </button>
-                        <button onClick={() => toast.info('Calling client...', { description: task.clientName })}
-                            style={{ flex: 1, height: 34, borderRadius: 8, border: '1px solid #27272A', backgroundColor: '#1A1A1F', color: '#A1A1AA', fontSize: 12, fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-                            <Phone size={14} /> Call
-                        </button>
+                        <a href={`tel:${client.phone}`}
+                            style={{ flex: 1, height: 34, borderRadius: 8, border: '1px solid #27272A', backgroundColor: '#1A1A1F', color: '#A1A1AA', fontSize: 12, fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, textDecoration: 'none' }}>
+                            <Phone size={14} /> Call {client.phone}
+                        </a>
                     </div>
                 )}
             </Card>
 
             {/* Action Buttons */}
             {task.status === 'assigned' && (
-                <Button size="lg" style={{ width: '100%', height: 52, fontSize: 16 }}>
-                    <Play size={18} weight="fill" /> Start This Task
+                <Button size="lg" disabled={busy} onClick={startTask} style={{ width: '100%', height: 52, fontSize: 16 }}>
+                    <Play size={18} weight="fill" /> {busy ? 'Starting…' : 'Start This Task'}
                 </Button>
             )}
 
@@ -158,38 +197,6 @@ export default function TaskDetailPage() {
             {showCompletion && (
                 <Card style={{ marginTop: 8 }}>
                     <h3 className="heading-2" style={{ marginBottom: 12 }}>Complete This Task</h3>
-
-                    {/* Proof of Completion Upload */}
-                    <div style={{ marginBottom: 16 }}>
-                        <p style={{ fontSize: 13, fontWeight: 500, color: '#A1A1AA', marginBottom: 8 }}>Proof of Completion</p>
-                        <input type="file" accept="image/*" ref={fileInputRef} style={{ display: 'none' }} onChange={e => {
-                            const file = e.target.files[0]
-                            if (!file) return
-                            if (file.size > 5 * 1024 * 1024) {
-                                toast.error('File too large', { description: 'Max file size is 5 MB' })
-                                e.target.value = ''
-                                return
-                            }
-                            setProofFile(file)
-                            toast.success('Photo added')
-                        }} />
-                        {proofFile ? (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: 12, backgroundColor: '#1A1A1F', borderRadius: 10, border: '1px solid #27272A' }}>
-                                <Image size={20} style={{ color: '#22C55E', flexShrink: 0 }} />
-                                <div style={{ flex: 1, minWidth: 0 }}>
-                                    <p style={{ fontSize: 13, color: '#F5F5F4', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{proofFile.name}</p>
-                                    <p style={{ fontSize: 11, color: '#71717A' }}>{(proofFile.size / 1024).toFixed(0)} KB</p>
-                                </div>
-                                <button onClick={() => setProofFile(null)} style={{ fontSize: 12, color: '#EF4444', background: 'none', border: 'none', cursor: 'pointer' }}>Remove</button>
-                            </div>
-                        ) : (
-                            <button onClick={() => fileInputRef.current?.click()}
-                                style={{ width: '100%', height: 60, borderRadius: 10, border: '2px dashed #27272A', backgroundColor: '#1A1A1F', color: '#71717A', fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                                <Camera size={18} /> Upload Photo (optional)
-                            </button>
-                        )}
-                    </div>
-
                     <div style={{ marginBottom: 16 }}>
                         <Textarea label="Completion Notes (optional)" placeholder="Any notes about this delivery?" rows={3} value={completionNotes} onChange={(e) => setCompletionNotes(e.target.value)} />
                     </div>
@@ -199,7 +206,7 @@ export default function TaskDetailPage() {
                     </label>
                     <div style={{ display: 'flex', gap: 12 }}>
                         <Button variant="secondary" onClick={() => setShowCompletion(false)} style={{ flex: 1 }}>Cancel</Button>
-                        <Button disabled={!confirmed} onClick={() => setCompleted(true)} style={{ flex: 1, backgroundColor: '#22C55E', color: '#0A0A0B' }}>Submit Completion</Button>
+                        <Button disabled={!confirmed || busy} onClick={submitCompletion} style={{ flex: 1, backgroundColor: '#22C55E', color: '#0A0A0B' }}>{busy ? 'Submitting…' : 'Submit Completion'}</Button>
                     </div>
                 </Card>
             )}

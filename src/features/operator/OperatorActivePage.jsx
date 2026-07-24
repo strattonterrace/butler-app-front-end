@@ -1,19 +1,30 @@
 import { useState, useEffect } from 'react'
-import { Badge, Card, SkeletonTable } from '@/components/ui'
+import { toast } from 'sonner'
+import { Badge, SkeletonTable } from '@/components/ui'
+import { requestsApi } from '@/api/requests'
+import { extractErrorMessage } from '@/api/client'
 import { formatDate, SERVICE_TYPES } from '@/lib/utils'
-import { MOCK_REQUESTS } from '@/mock/data'
 import { PageTransition } from '@/components/motion/Animations'
 import { usePageTitle } from '@/hooks/useEdgeCases'
-import { MapPin, User } from '@phosphor-icons/react'
 
 const STATUS_BADGE = { assigned: 'purple', in_progress: 'warning' }
 const STATUS_LABEL = { assigned: 'Assigned', in_progress: 'In Progress' }
 
 export default function OperatorActivePage() {
     usePageTitle('Active Fulfillments')
-    const active = MOCK_REQUESTS.filter(r => ['assigned', 'in_progress'].includes(r.status))
+    const [requests, setRequests] = useState([])
     const [loading, setLoading] = useState(true)
-    useEffect(() => { const t = setTimeout(() => setLoading(false), 500); return () => clearTimeout(t) }, [])
+
+    useEffect(() => {
+        let active = true
+        requestsApi.list({ ordering: '-updated_at' })
+            .then((data) => { if (active) setRequests(data.results ?? []) })
+            .catch((error) => { if (active) toast.error('Could not load fulfillments', { description: extractErrorMessage(error) }) })
+            .finally(() => { if (active) setLoading(false) })
+        return () => { active = false }
+    }, [])
+
+    const active = requests.filter(r => ['assigned', 'in_progress'].includes(r.status))
 
     if (loading) return <div style={{ maxWidth: 1000, margin: '0 auto' }}><SkeletonTable /></div>
 

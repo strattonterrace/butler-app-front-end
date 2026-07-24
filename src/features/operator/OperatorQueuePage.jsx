@@ -1,11 +1,14 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
+import { Link } from 'react-router-dom'
 import { Badge, Button, Card, SkeletonCard } from '@/components/ui'
 import { toast } from 'sonner'
+import { requestsApi } from '@/api/requests'
+import { driversApi } from '@/api/drivers'
+import { extractErrorMessage } from '@/api/client'
 import { formatDate, SERVICE_TYPES } from '@/lib/utils'
-import { MOCK_REQUESTS, MOCK_ALL_USERS } from '@/mock/data'
 import { PageTransition } from '@/components/motion/Animations'
 import { usePageTitle } from '@/hooks/useEdgeCases'
-import { MapPin, CalendarBlank, MagnifyingGlass, UserCirclePlus, Eye } from '@phosphor-icons/react'
+import { MapPin, CalendarBlank, MagnifyingGlass, Eye } from '@phosphor-icons/react'
 
 const STATUS_BADGE = { submitted: 'gold', reviewed: 'info' }
 const STATUS_LABEL = { submitted: 'Submitted', reviewed: 'Reviewed' }
@@ -15,13 +18,70 @@ export default function OperatorQueuePage() {
     const [search, setSearch] = useState('')
     const [serviceFilter, setServiceFilter] = useState('')
     const [urgencyFilter, setUrgencyFilter] = useState('')
-    const drivers = MOCK_ALL_USERS.filter(u => u.role === 'driver' && u.approvalStatus === 'approved')
-    const queue = MOCK_REQUESTS.filter(r => ['submitted', 'reviewed'].includes(r.status))
+    const [requests, setRequests] = useState([])
+    const [drivers, setDrivers] = useState([])
+    const [loading, setLoading] = useState(true)
+    const [actingId, setActingId] = useState(null)
+
+    const loadQueue = useCallback(async () => {
+        try {
+            const data = await requestsApi.list({ ordering: '-created_at' })
+            setRequests(data.results ?? [])
+        } catch (error) {
+            toast.error('Could not load the queue', { description: extractErrorMessage(error) })
+        }
+    }, [])
+
+    useEffect(() => {
+        let active = true
+        Promise.all([
+            requestsApi.list({ ordering: '-created_at' }).then(d => d.results ?? []).catch(() => []),
+            driversApi.available().catch(() => []),
+        ]).then(([reqs, drvs]) => {
+            if (!active) return
+            setRequests(reqs)
+            setDrivers(drvs)
+        }).finally(() => { if (active) setLoading(false) })
+        return () => { active = false }
+    }, [])
+
+    const markReviewed = async (req) => {
+        setActingId(req.id)
+        try {
+            await requestsApi.transition(req.id, { status: 'reviewed' })
+            toast.success('Marked as reviewed', { description: req.title })
+            await loadQueue()
+        } catch (error) {
+            toast.error('Could not update request', { description: extractErrorMessage(error) })
+        } finally {
+            setActingId(null)
+        }
+    }
+
+    const assignDriver = async (req, driverId, driverName) => {
+        if (!driverId) return
+        setActingId(req.id)
+        try {
+            await requestsApi.transition(req.id, { status: 'assigned', driverId })
+            toast.success('Driver assigned', { description: `${req.title} → ${driverName}` })
+            await loadQueue()
+        } catch (error) {
+            toast.error('Could not assign driver', { description: extractErrorMessage(error) })
+        } finally {
+            setActingId(null)
+        }
+    }
+
+    const queue = requests.filter(r => ['submitted', 'reviewed'].includes(r.status))
         .filter(r => !search || r.title.toLowerCase().includes(search.toLowerCase()))
         .filter(r => !serviceFilter || r.serviceType === serviceFilter)
         .filter(r => !urgencyFilter || r.urgency === urgencyFilter)
 
     const selectStyle = { height: 34, borderRadius: 8, border: '1px solid #27272A', backgroundColor: '#1E1E24', color: '#F5F5F4', padding: '0 10px', fontSize: 13, fontFamily: 'inherit', cursor: 'pointer', outline: 'none' }
+
+    if (loading) {
+        return <div style={{ maxWidth: 1000, margin: '0 auto' }}><SkeletonCard /><SkeletonCard /><SkeletonCard /></div>
+    }
 
     return (
         <div style={{ maxWidth: 1000, margin: '0 auto' }}>
@@ -85,17 +145,31 @@ export default function OperatorQueuePage() {
                         )}
 
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8, paddingTop: 12, borderTop: '1px solid #1F1F23' }}>
-                            {req.status === 'submitted' && <Button size="sm" onClick={() => toast.success('Marked as reviewed', { description: req.title })}>Mark Reviewed</Button>}
+                            {req.status === 'submitted' && (
+                                <Button size="sm" disabled={actingId === req.id} onClick={() => markReviewed(req)}>
+                                    {actingId === req.id ? 'Working…' : 'Mark Reviewed'}
+                                </Button>
+                            )}
                             {req.status === 'reviewed' && (
-                                <select onChange={(e) => { if (e.target.value) toast.success('Driver assigned', { description: `${req.title} → ${e.target.selectedOptions[0].text}` }) }} style={{
-                                    height: 34, borderRadius: 8, border: '1px solid #27272A', backgroundColor: '#1E1E24',
-                                    color: '#F5F5F4', padding: '0 12px', fontSize: 13, fontFamily: 'inherit', cursor: 'pointer',
-                                }}>
-                                    <option value="">Assign to driver...</option>
-                                    {drivers.map(d => <option key={d.id} value={d.id}>{d.fullName}</option>)}
+                                <select
+                                    disabled={actingId === req.id || drivers.length === 0}
+                                    defaultValue=""
+                                    onChange={(e) => { if (e.target.value) assignDriver(req, e.target.value, e.target.selectedOptions[0].text) }}
+                                    style={{
+                                        height: 34, borderRadius: 8, border: '1px solid #27272A', backgroundColor: '#1E1E24',
+                                        color: '#F5F5F4', padding: '0 12px', fontSize: 13, fontFamily: 'inherit', cursor: 'pointer',
+                                    }}>
+                                    <option value="">{drivers.length === 0 ? 'No drivers available' : 'Assign to driver…'}</option>
+                                    {drivers.map(d => (
+                                        <option key={d.id} value={d.id}>
+                                            {d.name}{typeof d.currentTaskCount === 'number' ? ` (${d.currentTaskCount} active)` : ''}
+                                        </option>
+                                    ))}
                                 </select>
                             )}
-                            <Button variant="ghost" size="sm"><Eye size={14} /> View</Button>
+                            <Link to={`/requests/${req.id}`} style={{ textDecoration: 'none' }}>
+                                <Button variant="ghost" size="sm"><Eye size={14} /> View</Button>
+                            </Link>
                         </div>
                     </Card>
                 ))}

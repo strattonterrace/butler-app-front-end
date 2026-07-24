@@ -1,9 +1,12 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
+import { requestsApi } from '@/api/requests'
+import { extractErrorMessage } from '@/api/client'
 import { Button, Input, Textarea } from '@/components/ui'
 import { SERVICE_TYPES } from '@/lib/utils'
 import { useUnsavedChanges, usePageTitle } from '@/hooks/useEdgeCases'
+import { useUIStore } from '@/store/uiStore'
 import { Basket, Pill, TShirt, Package, ArrowUUpLeft, CookingPot, ArrowLeft, CheckCircle } from '@phosphor-icons/react'
 
 const SERVICE_ICONS = { grocery: Basket, pharmacy: Pill, dry_cleaning: TShirt, package: Package, retail_return: ArrowUUpLeft, food_pickup: CookingPot }
@@ -15,16 +18,55 @@ const URGENCY_OPTIONS = [
 
 export default function NewRequestPage() {
     const navigate = useNavigate()
+    const { theme } = useUIStore()
+    const isLight = theme === 'light'
     const [selectedService, setSelectedService] = useState(null)
     const [urgency, setUrgency] = useState('asap')
     const [submitted, setSubmitted] = useState(false)
-    const [form, setForm] = useState({ title: '', description: '', pickup: '', dropoff: '', instructions: '', budget: '' })
+    const [submitting, setSubmitting] = useState(false)
+    const [form, setForm] = useState({ title: '', description: '', pickup: '', dropoff: '', instructions: '', budget: '', scheduledDate: '', scheduledWindow: 'morning' })
     const update = (field) => (e) => setForm({ ...form, [field]: e.target.value })
 
     // Warn before leaving with unsaved form data
     const isDirty = !submitted && (selectedService || Object.values(form).some(v => v))
     useUnsavedChanges(isDirty)
     usePageTitle('New Request')
+
+    const handleSubmit = async (e) => {
+        e.preventDefault()
+        if (!form.title.trim() || !form.pickup.trim() || !form.dropoff.trim()) {
+            toast.error('Missing details', { description: 'Title, pickup and drop-off are required.' })
+            return
+        }
+        if (urgency === 'scheduled' && !form.scheduledDate) {
+            toast.error('Pick a date', { description: 'Scheduled requests need a date and time window.' })
+            return
+        }
+        const payload = {
+            serviceType: selectedService,
+            title: form.title.trim(),
+            description: form.description.trim(),
+            pickupLocation: form.pickup.trim(),
+            dropoffLocation: form.dropoff.trim(),
+            urgency,
+            specialInstructions: form.instructions.trim(),
+            estimatedBudget: form.budget.trim(),
+        }
+        if (urgency === 'scheduled') {
+            payload.scheduledDate = form.scheduledDate
+            payload.scheduledWindow = form.scheduledWindow
+        }
+        setSubmitting(true)
+        try {
+            await requestsApi.create(payload)
+            setSubmitted(true)
+            toast.success('Request submitted!', { description: 'An operator will review it shortly.' })
+        } catch (error) {
+            toast.error('Could not submit request', { description: extractErrorMessage(error) })
+        } finally {
+            setSubmitting(false)
+        }
+    }
 
     if (submitted) {
         return (
@@ -53,7 +95,7 @@ export default function NewRequestPage() {
                 <p className="muted-text" style={{ marginTop: 4 }}>Tell us what you need — we&apos;ll handle the rest.</p>
             </div>
 
-            <form onSubmit={(e) => { e.preventDefault(); setSubmitted(true); toast.success('Request submitted!', { description: 'An operator will review it shortly.' }) }}>
+            <form onSubmit={handleSubmit}>
                 {/* Service Type */}
                 <div className="page-section">
                     <p className="label-text" style={{ marginBottom: 12 }}>Service Type</p>
@@ -66,9 +108,10 @@ export default function NewRequestPage() {
                                     style={{
                                         display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
                                         padding: '16px 12px', borderRadius: 14, textAlign: 'center', cursor: 'pointer',
-                                        border: active ? '1px solid #C9A84C' : '1px solid #27272A',
-                                        backgroundColor: active ? 'rgba(201,168,76,0.05)' : '#111113',
-                                        color: active ? '#C9A84C' : '#A1A1AA', transition: 'all 150ms',
+                                        border: active ? '1px solid #C9A84C' : `1px solid ${isLight ? '#E4E4E7' : '#27272A'}`,
+                                        backgroundColor: active ? 'rgba(201,168,76,0.08)' : (isLight ? '#FFFFFF' : '#111113'),
+                                        color: active ? '#C9A84C' : (isLight ? '#44403C' : '#A1A1AA'),
+                                        transition: 'all 150ms',
                                     }}
                                 >
                                     <Icon size={24} weight={active ? 'fill' : 'regular'} />
@@ -111,6 +154,28 @@ export default function NewRequestPage() {
                                     )
                                 })}
                             </div>
+                            {urgency === 'scheduled' && (
+                                <div style={{ display: 'flex', gap: 12, marginTop: 16, flexWrap: 'wrap' }}>
+                                    <div style={{ flex: 1, minWidth: 160 }}>
+                                        <Input type="date" label="Date" value={form.scheduledDate} onChange={update('scheduledDate')} />
+                                    </div>
+                                    <div style={{ flex: 1, minWidth: 160 }}>
+                                        <p className="label-text" style={{ marginBottom: 6 }}>Time Window</p>
+                                        <select value={form.scheduledWindow} onChange={update('scheduledWindow')}
+                                            style={{
+                                                width: '100%', height: 42, borderRadius: 10,
+                                                border: `1px solid ${isLight ? '#D4D4D4' : '#27272A'}`,
+                                                backgroundColor: isLight ? '#F4F4F5' : '#1E1E24',
+                                                padding: '0 12px', fontSize: 14, fontFamily: 'inherit',
+                                                color: isLight ? '#1C1917' : '#F5F5F4', outline: 'none',
+                                            }}>
+                                            <option value="morning">Morning</option>
+                                            <option value="afternoon">Afternoon</option>
+                                            <option value="evening">Evening</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         {/* Additional */}
@@ -122,8 +187,8 @@ export default function NewRequestPage() {
 
                         {/* Submit */}
                         <div style={{ display: 'flex', gap: 12, paddingTop: 8 }}>
-                            <Button type="button" variant="secondary" onClick={() => navigate(-1)} style={{ flex: 1 }}>Cancel</Button>
-                            <Button type="submit" size="lg" style={{ flex: 1 }}>Submit Request</Button>
+                            <Button type="button" variant="secondary" onClick={() => navigate(-1)} style={{ flex: 1 }} disabled={submitting}>Cancel</Button>
+                            <Button type="submit" size="lg" style={{ flex: 1 }} disabled={submitting}>{submitting ? 'Submitting…' : 'Submit Request'}</Button>
                         </div>
                     </>
                 )}

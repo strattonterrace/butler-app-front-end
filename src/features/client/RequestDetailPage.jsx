@@ -1,10 +1,12 @@
-import { useParams, Link, useNavigate } from 'react-router-dom'
-import { Badge, Button, Card } from '@/components/ui'
+import { useState, useEffect } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
+import { Badge, Button, Card, SkeletonCard } from '@/components/ui'
 import { toast } from 'sonner'
+import { requestsApi } from '@/api/requests'
+import { extractErrorMessage } from '@/api/client'
 import { formatDate, SERVICE_TYPES } from '@/lib/utils'
-import { MOCK_REQUESTS } from '@/mock/data'
 import { usePageTitle, useIsMobile } from '@/hooks/useEdgeCases'
-import { ArrowLeft, MapPin, CalendarBlank, Clock, User, Car, Phone, CheckCircle, Circle, Basket, Pill, TShirt, Package, ArrowUUpLeft, CookingPot, Star, ChatDots, Timer } from '@phosphor-icons/react'
+import { ArrowLeft, MapPin, CalendarBlank, Clock, Car, Phone, CheckCircle, Basket, Pill, TShirt, Package, ArrowUUpLeft, CookingPot } from '@phosphor-icons/react'
 
 const SERVICE_ICONS = { grocery: Basket, pharmacy: Pill, dry_cleaning: TShirt, package: Package, retail_return: ArrowUUpLeft, food_pickup: CookingPot }
 const STATUS_BADGE = { submitted: 'gold', reviewed: 'info', assigned: 'purple', in_progress: 'warning', completed: 'success', cancelled: 'error' }
@@ -23,7 +25,7 @@ function InfoRow({ icon: Icon, label, value }) {
 }
 
 function TimelineItem({ entry, isLast }) {
-    const isCompleted = true
+    const actor = entry.changedBy?.fullName || 'System'
     return (
         <div style={{ display: 'flex', gap: 12 }}>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -31,8 +33,8 @@ function TimelineItem({ entry, isLast }) {
                 {!isLast && <div style={{ width: 2, flex: 1, backgroundColor: '#27272A', marginTop: 4 }} />}
             </div>
             <div style={{ paddingBottom: isLast ? 0 : 16 }}>
-                <p style={{ fontSize: 14, fontWeight: 500, color: '#F5F5F4', textTransform: 'capitalize' }}>{entry.status.replace('_', ' ')}</p>
-                <p style={{ fontSize: 12, color: '#71717A' }}>{entry.actor} · {formatDate(entry.timestamp, { format: 'relative' })}</p>
+                <p style={{ fontSize: 14, fontWeight: 500, color: '#F5F5F4', textTransform: 'capitalize' }}>{entry.toStatus.replace('_', ' ')}</p>
+                <p style={{ fontSize: 12, color: '#71717A' }}>{actor} · {formatDate(entry.createdAt, { format: 'relative' })}</p>
             </div>
         </div>
     )
@@ -42,9 +44,44 @@ export default function RequestDetailPage() {
     const { id } = useParams()
     const navigate = useNavigate()
     const mobile = useIsMobile()
-    const request = MOCK_REQUESTS.find(r => r.id === id)
+    const [request, setRequest] = useState(null)
+    const [loading, setLoading] = useState(true)
+    const [cancelling, setCancelling] = useState(false)
     usePageTitle(request ? request.title : 'Request Detail')
     const ServiceIcon = SERVICE_ICONS[request?.serviceType] || Basket
+
+    useEffect(() => {
+        let active = true
+        setLoading(true)
+        requestsApi.get(id)
+            .then((data) => { if (active) setRequest(data) })
+            .catch(() => { if (active) setRequest(null) })
+            .finally(() => { if (active) setLoading(false) })
+        return () => { active = false }
+    }, [id])
+
+    const handleCancel = async () => {
+        const reason = window.prompt('Why are you cancelling this request?')
+        if (reason === null) return
+        if (!reason.trim()) {
+            toast.error('A reason is required to cancel.')
+            return
+        }
+        setCancelling(true)
+        try {
+            const updated = await requestsApi.transition(id, { status: 'cancelled', cancelReason: reason.trim() })
+            setRequest(updated)
+            toast.success('Request cancelled')
+        } catch (error) {
+            toast.error('Could not cancel request', { description: extractErrorMessage(error) })
+        } finally {
+            setCancelling(false)
+        }
+    }
+
+    if (loading) {
+        return <div style={{ maxWidth: 800, margin: '0 auto' }}><SkeletonCard lines={4} /></div>
+    }
 
     if (!request) {
         return (
@@ -55,6 +92,11 @@ export default function RequestDetailPage() {
             </div>
         )
     }
+
+    // Detail serializer shape: driver is a nested object (or null) with a
+    // pre-formatted `vehicle` string; timeline entries carry toStatus/createdAt.
+    const driver = request.driver
+    const timeline = request.statusHistory || []
 
     return (
         <div style={{ maxWidth: 800, margin: '0 auto' }}>
@@ -79,7 +121,9 @@ export default function RequestDetailPage() {
                         </div>
                     </div>
                     {['submitted', 'reviewed'].includes(request.status) && (
-                        <Button variant="destructive" size="sm">Cancel Request</Button>
+                        <Button variant="destructive" size="sm" onClick={handleCancel} disabled={cancelling}>
+                            {cancelling ? 'Cancelling…' : 'Cancel Request'}
+                        </Button>
                     )}
                 </div>
             </div>
@@ -122,69 +166,32 @@ export default function RequestDetailPage() {
                 {/* Right — Sidebar */}
                 <div>
                     {/* Driver Info */}
-                    {request.driverName && (
+                    {driver && (
                         <Card style={{ marginBottom: 16 }}>
                             <h3 className="heading-2" style={{ marginBottom: 12 }}>Your Driver</h3>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
                                 <div style={{ width: 40, height: 40, borderRadius: '50%', backgroundColor: '#1A1A1F', border: '1px solid #27272A', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 600, color: '#A1A1AA' }}>
-                                    {request.driverName.split(' ').map(n => n[0]).join('')}
+                                    {driver.fullName.split(' ').map(n => n[0]).join('')}
                                 </div>
                                 <div>
-                                    <p style={{ fontSize: 14, fontWeight: 500, color: '#F5F5F4' }}>{request.driverName}</p>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
-                                        <span style={{ display: 'flex', alignItems: 'center', gap: 2, fontSize: 12, color: '#F59E0B', fontWeight: 600 }}><Star size={11} weight="fill" /> 4.9</span>
-                                        <span style={{ fontSize: 12, color: '#71717A' }}>· Driver</span>
-                                    </div>
+                                    <p style={{ fontSize: 14, fontWeight: 500, color: '#F5F5F4' }}>{driver.fullName}</p>
+                                    <span style={{ fontSize: 12, color: '#71717A' }}>Driver</span>
                                 </div>
                             </div>
-                            {request.driverVehicle && (
+                            {driver.vehicle && (
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#A1A1AA', padding: '8px 0', borderTop: '1px solid #1F1F23' }}>
                                     <Car size={16} style={{ color: '#71717A' }} />
-                                    <span>{request.driverVehicle.year} {request.driverVehicle.make} {request.driverVehicle.model}</span>
-                                    <span style={{ color: '#71717A' }}>·</span>
-                                    <span style={{ color: '#71717A' }}>{request.driverVehicle.plate}</span>
+                                    <span>{driver.vehicle}</span>
                                 </div>
                             )}
-                            {['assigned', 'in_progress'].includes(request.status) && (
-                                <div style={{ padding: '8px 0', borderTop: '1px solid #1F1F23', display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#A1A1AA' }}>
-                                    <Timer size={16} style={{ color: '#3B82F6' }} />
-                                    <span>Est. arrival: <strong style={{ color: '#F5F5F4' }}>~25 min</strong></span>
+                            {driver.phone && !['completed', 'cancelled'].includes(request.status) && (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12, paddingTop: 12, borderTop: '1px solid #1F1F23' }}>
+                                    <a href={`tel:${driver.phone}`}
+                                        style={{ flex: 1, height: 34, borderRadius: 8, border: '1px solid #27272A', backgroundColor: '#1A1A1F', color: '#A1A1AA', fontSize: 12, fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, textDecoration: 'none' }}>
+                                        <Phone size={14} /> Call {driver.phone}
+                                    </a>
                                 </div>
                             )}
-                            {/* Message / Call Driver */}
-                            {!['completed', 'cancelled'].includes(request.status) && (
-                                <div style={{ display: 'flex', gap: 8, marginTop: 12, paddingTop: 12, borderTop: '1px solid #1F1F23' }}>
-                                    <button onClick={() => toast.info('Message sent', { description: `Message to ${request.driverName}` })}
-                                        style={{ flex: 1, height: 34, borderRadius: 8, border: '1px solid #27272A', backgroundColor: '#1A1A1F', color: '#A1A1AA', fontSize: 12, fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-                                        <ChatDots size={14} /> Message
-                                    </button>
-                                    <button onClick={() => toast.info('Calling driver...', { description: request.driverName })}
-                                        style={{ flex: 1, height: 34, borderRadius: 8, border: '1px solid #27272A', backgroundColor: '#1A1A1F', color: '#A1A1AA', fontSize: 12, fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-                                        <Phone size={14} /> Call
-                                    </button>
-                                </div>
-                            )}
-                        </Card>
-                    )}
-
-                    {/* Tip Prompt — visible on completed requests */}
-                    {request.status === 'completed' && request.driverName && (
-                        <Card style={{ marginBottom: 16, borderColor: 'rgba(201,168,76,0.2)' }}>
-                            <h3 className="heading-2" style={{ marginBottom: 8 }}>💛 Tip Your Driver</h3>
-                            <p style={{ fontSize: 14, color: '#A1A1AA', lineHeight: 1.6, marginBottom: 12 }}>
-                                {request.driverName.split(' ')[0]} did a great job! If you&apos;d like to show appreciation, consider tipping directly via:
-                            </p>
-                            <div style={{ display: 'flex', gap: 8 }}>
-                                <div style={{ flex: 1, padding: '10px 12px', borderRadius: 8, backgroundColor: '#1A1A1F', textAlign: 'center' }}>
-                                    <p style={{ fontSize: 13, fontWeight: 500, color: '#F5F5F4' }}>Venmo</p>
-                                    <p style={{ fontSize: 11, color: '#71717A' }}>@driver-handle</p>
-                                </div>
-                                <div style={{ flex: 1, padding: '10px 12px', borderRadius: 8, backgroundColor: '#1A1A1F', textAlign: 'center' }}>
-                                    <p style={{ fontSize: 13, fontWeight: 500, color: '#F5F5F4' }}>Cash App</p>
-                                    <p style={{ fontSize: 11, color: '#71717A' }}>$driver-handle</p>
-                                </div>
-                            </div>
-                            <p style={{ fontSize: 11, color: '#71717A', marginTop: 8 }}>Tips are optional and go directly to your driver.</p>
                         </Card>
                     )}
 
@@ -192,8 +199,8 @@ export default function RequestDetailPage() {
                     <Card>
                         <h3 className="heading-2" style={{ marginBottom: 16 }}>Timeline</h3>
                         <div>
-                            {[...request.statusHistory].reverse().map((entry, i) => (
-                                <TimelineItem key={i} entry={entry} isLast={i === request.statusHistory.length - 1} />
+                            {[...timeline].reverse().map((entry, i) => (
+                                <TimelineItem key={entry.id || i} entry={entry} isLast={i === timeline.length - 1} />
                             ))}
                         </div>
                     </Card>

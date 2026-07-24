@@ -1,41 +1,47 @@
 import { useState, useEffect } from 'react'
 import { Badge, Card, SkeletonCard } from '@/components/ui'
 import { toast } from 'sonner'
-import { formatDate, formatCurrency, SERVICE_TYPES } from '@/lib/utils'
-import { MOCK_REQUESTS, MOCK_TERRITORIES } from '@/mock/data'
+import { requestsApi } from '@/api/requests'
+import { extractErrorMessage } from '@/api/client'
+import { formatDate, SERVICE_TYPES } from '@/lib/utils'
 import { Link } from 'react-router-dom'
 import { PageTransition } from '@/components/motion/Animations'
 import { usePageTitle, useIsMobile } from '@/hooks/useEdgeCases'
-import { ClockCountdown, UserCirclePlus, CheckCircle, Lightning, MapPin, ArrowRight, Users, Car, CurrencyDollar, Timer, Percent, ShoppingCart } from '@phosphor-icons/react'
+import { useUIStore } from '@/store/uiStore'
+import { ClockCountdown, UserCirclePlus, CheckCircle, Lightning, MapPin, ArrowRight, Users, Car } from '@phosphor-icons/react'
 
 const STATUS_BADGE = { submitted: 'gold', reviewed: 'info', assigned: 'purple', in_progress: 'warning', completed: 'success' }
 const STATUS_LABEL = { submitted: 'Submitted', reviewed: 'Reviewed', assigned: 'Assigned', in_progress: 'In Progress', completed: 'Completed' }
 
 function StatsCard({ label, value, icon: Icon, accent }) {
+    const { theme } = useUIStore()
+    const isLight = theme === 'light'
     return (
-        <div style={{ backgroundColor: '#111113', border: '1px solid #27272A', borderRadius: 'clamp(10px, 2vw, 14px)', padding: 'clamp(12px, 2vw, 16px) clamp(14px, 2.5vw, 20px)' }}>
+        <div style={{ backgroundColor: isLight ? '#FFFFFF' : '#111113', border: `1px solid ${isLight ? '#E4E4E7' : '#27272A'}`, borderRadius: 'clamp(10px, 2vw, 14px)', padding: 'clamp(12px, 2vw, 16px) clamp(14px, 2.5vw, 20px)' }}>
             <Icon size={16} style={{ color: accent, marginBottom: 'clamp(4px, 1vw, 8px)' }} />
-            <p style={{ fontSize: 'clamp(18px, 4vw, 26px)', fontWeight: 700, color: '#F5F5F4', lineHeight: 1.1 }}>{value}</p>
+            <p style={{ fontSize: 'clamp(18px, 4vw, 26px)', fontWeight: 700, color: isLight ? '#1C1917' : '#F5F5F4', lineHeight: 1.1 }}>{value}</p>
             <p style={{ fontSize: 'clamp(10px, 1.5vw, 12px)', color: '#71717A', marginTop: 'clamp(2px, 0.5vw, 4px)' }}>{label}</p>
         </div>
     )
 }
 
 function QueueCard({ request }) {
+    const { theme } = useUIStore()
+    const isLight = theme === 'light'
     return (
         <Card>
             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 8 }}>
                 <div style={{ minWidth: 0, flex: 1 }}>
-                    <p style={{ fontSize: 14, fontWeight: 600, color: '#F5F5F4', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{request.title}</p>
+                    <p style={{ fontSize: 14, fontWeight: 600, color: isLight ? '#1C1917' : '#F5F5F4', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{request.title}</p>
                     <p style={{ fontSize: 12, color: '#71717A' }}>{SERVICE_TYPES[request.serviceType]?.label} · {request.clientName}</p>
                 </div>
                 <Badge variant={STATUS_BADGE[request.status]} size="sm">{STATUS_LABEL[request.status]}</Badge>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: '#71717A', marginTop: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: '#71717A', marginTop: 8, flexWrap: 'wrap' }}>
                 <MapPin size={13} />{request.pickupLocation.split(',')[0]}
                 <span>→</span>{request.dropoffLocation.split(',')[0]}
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 12, paddingTop: 12, borderTop: '1px solid #1F1F23' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 12, paddingTop: 12, borderTop: `1px solid ${isLight ? '#F0F0F0' : '#1F1F23'}` }}>
                 <span style={{ fontSize: 12, color: '#71717A' }}>{formatDate(request.createdAt, { format: 'relative' })}</span>
                 <span style={{ fontSize: 12, color: '#C9A84C', fontWeight: 500, textTransform: 'capitalize' }}>{request.urgency}</span>
             </div>
@@ -47,7 +53,23 @@ export default function OperatorDashboard() {
     usePageTitle('Operator Dashboard')
     const mobile = useIsMobile()
     const [loading, setLoading] = useState(true)
-    useEffect(() => { const t = setTimeout(() => setLoading(false), 600); return () => clearTimeout(t) }, [])
+    const [requests, setRequests] = useState([])
+    const [stats, setStats] = useState(null)
+
+    useEffect(() => {
+        let active = true
+        Promise.all([
+            requestsApi.list({ ordering: '-updated_at' }).then(d => d.results ?? []).catch(() => []),
+            requestsApi.stats().catch(() => null),
+        ]).then(([reqs, st]) => {
+            if (!active) return
+            setRequests(reqs)
+            setStats(st)
+        }).catch((error) => {
+            if (active) toast.error('Could not load dashboard', { description: extractErrorMessage(error) })
+        }).finally(() => { if (active) setLoading(false) })
+        return () => { active = false }
+    }, [])
 
     if (loading) return (
         <div style={{ maxWidth: 1000, margin: '0 auto' }}>
@@ -57,35 +79,24 @@ export default function OperatorDashboard() {
         </div>
     )
 
-    // Operator sees only their territory — mock: Alex Rivera → Orange County
-    const territory = MOCK_TERRITORIES[0]
-    const submitted = MOCK_REQUESTS.filter(r => r.status === 'submitted')
-    const assigned = MOCK_REQUESTS.filter(r => r.status === 'assigned')
-    const inProgress = MOCK_REQUESTS.filter(r => r.status === 'in_progress')
-    const completedToday = MOCK_REQUESTS.filter(r => r.status === 'completed')
-    const ordersThisMonth = [...submitted, ...assigned, ...inProgress, ...completedToday]
+    const submitted = requests.filter(r => r.status === 'submitted')
+    const assigned = requests.filter(r => r.status === 'assigned')
+    const inProgress = requests.filter(r => r.status === 'in_progress')
 
     return (
         <PageTransition>
             <div style={{ maxWidth: 1000, margin: '0 auto' }}>
                 <div className="page-section">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                        <span style={{ fontSize: 12, fontWeight: 600, color: '#C9A84C', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{territory.name}</span>
-                    </div>
                     <h1 className="heading-1">Operator Dashboard</h1>
-                    <p className="muted-text" style={{ marginTop: 4 }}>Territory overview and request management.</p>
+                    <p className="muted-text" style={{ marginTop: 4 }}>Your territory's request pipeline.</p>
                 </div>
 
-                {/* ── 8 Territory Metrics ── */}
+                {/* ── Real pipeline counters (from /requests/stats/) ── */}
                 <div className="page-section grid-stats">
-                    <StatsCard label="Active Clients" value={territory.clients} icon={Users} accent="#3B82F6" />
-                    <StatsCard label="Active Drivers" value={territory.drivers} icon={Car} accent="#22C55E" />
-                    <StatsCard label="Orders Today" value={submitted.length + assigned.length + inProgress.length + completedToday.length} icon={ShoppingCart} accent="#F59E0B" />
-                    <StatsCard label="Orders This Month" value={territory.ordersThisMonth} icon={ShoppingCart} accent="#A1A1AA" />
-                    <StatsCard label="Territory Revenue" value={formatCurrency(territory.revenue)} icon={CurrencyDollar} accent="#C9A84C" />
-                    <StatsCard label="Your Commission" value={formatCurrency(territory.commission)} icon={CurrencyDollar} accent="#22C55E" />
-                    <StatsCard label="Completion Rate" value={`${(territory.completionRate * 100).toFixed(0)}%`} icon={Percent} accent="#8B5CF6" />
-                    <StatsCard label="Avg Fulfillment" value={`${territory.avgFulfillmentTime}m`} icon={Timer} accent="#3B82F6" />
+                    <StatsCard label="Pending Review" value={stats?.pendingReview ?? submitted.length} icon={ClockCountdown} accent="#F59E0B" />
+                    <StatsCard label="Assigned" value={stats?.assigned ?? assigned.length} icon={UserCirclePlus} accent="#8B5CF6" />
+                    <StatsCard label="In Progress" value={stats?.inProgress ?? inProgress.length} icon={Lightning} accent="#3B82F6" />
+                    <StatsCard label="Completed Today" value={stats?.completedToday ?? 0} icon={CheckCircle} accent="#22C55E" />
                 </div>
 
                 {/* ── Incoming Requests ── */}

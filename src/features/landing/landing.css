@@ -37,6 +37,18 @@
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
   min-height: 100vh;
+  isolation: isolate;
+  position: relative;
+}
+
+/* Kill any leaked app borders/styles inside landing */
+.landing-root section {
+  border: none !important;
+  outline: none !important;
+}
+
+.landing-root hr {
+  display: none;
 }
 .landing-root ::selection {
   background: rgba(201,168,76,0.25);

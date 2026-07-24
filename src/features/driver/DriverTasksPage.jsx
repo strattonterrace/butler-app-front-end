@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react'
-import { useAuthStore } from '@/store/authStore'
+import { useState, useEffect, useCallback } from 'react'
 import { Badge, Button, Card, SkeletonCard } from '@/components/ui'
 import { toast } from 'sonner'
+import { requestsApi } from '@/api/requests'
+import { extractErrorMessage } from '@/api/client'
 import { formatDate, SERVICE_TYPES } from '@/lib/utils'
-import { MOCK_REQUESTS } from '@/mock/data'
 import { PageTransition } from '@/components/motion/Animations'
 import { usePageTitle } from '@/hooks/useEdgeCases'
 import { MapPin, Play, CheckCircle, Clock } from '@phosphor-icons/react'
@@ -17,13 +17,41 @@ const TABS = [
 
 export default function DriverTasksPage() {
     usePageTitle('My Tasks')
-    const { currentUser } = useAuthStore()
     const [activeTab, setActiveTab] = useState('assigned')
-    const myTasks = MOCK_REQUESTS.filter(r => r.driverId === currentUser?.id)
-    const filtered = myTasks.filter(r => r.status === activeTab)
-
+    const [myTasks, setMyTasks] = useState([])
     const [loading, setLoading] = useState(true)
-    useEffect(() => { const t = setTimeout(() => setLoading(false), 500); return () => clearTimeout(t) }, [])
+    const [actingId, setActingId] = useState(null)
+
+    // Backend visible_to() scopes /requests/ to this driver's own tasks.
+    const load = useCallback(async () => {
+        try {
+            const data = await requestsApi.list({ ordering: '-updated_at' })
+            setMyTasks(data.results ?? [])
+        } catch (error) {
+            toast.error('Could not load your tasks', { description: extractErrorMessage(error) })
+        }
+    }, [])
+
+    useEffect(() => {
+        let active = true
+        load().finally(() => { if (active) setLoading(false) })
+        return () => { active = false }
+    }, [load])
+
+    const advance = async (req, nextStatus, label) => {
+        setActingId(req.id)
+        try {
+            await requestsApi.transition(req.id, { status: nextStatus })
+            toast.success(label, { description: req.title })
+            await load()
+        } catch (error) {
+            toast.error('Could not update task', { description: extractErrorMessage(error) })
+        } finally {
+            setActingId(null)
+        }
+    }
+
+    const filtered = myTasks.filter(r => r.status === activeTab)
 
     if (loading) return <div style={{ maxWidth: 900, margin: '0 auto' }}><SkeletonCard /><SkeletonCard /></div>
 
@@ -85,8 +113,8 @@ export default function DriverTasksPage() {
                                     <span style={{ marginLeft: 8, textTransform: 'capitalize', color: '#C9A84C' }}>{req.urgency}</span>
                                 </div>
                                 {req.status === 'assigned'
-                                    ? <Button size="sm" onClick={() => toast.success('Task started', { description: req.title })}><Play size={14} weight="fill" /> Start Task</Button>
-                                    : <Button size="sm" variant="secondary" onClick={() => toast.success('Task completed!', { description: req.title })}><CheckCircle size={14} weight="bold" /> Mark Completed</Button>
+                                    ? <Button size="sm" disabled={actingId === req.id} onClick={() => advance(req, 'in_progress', 'Task started')}><Play size={14} weight="fill" /> {actingId === req.id ? 'Starting…' : 'Start Task'}</Button>
+                                    : <Button size="sm" variant="secondary" disabled={actingId === req.id} onClick={() => advance(req, 'completed', 'Task completed!')}><CheckCircle size={14} weight="bold" /> {actingId === req.id ? 'Completing…' : 'Mark Completed'}</Button>
                                 }
                             </div>
                         </Card>

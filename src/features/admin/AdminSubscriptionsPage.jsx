@@ -1,26 +1,49 @@
 import { useState, useEffect } from 'react'
-import { Badge, Card, SkeletonTable } from '@/components/ui'
-import { formatCurrency } from '@/lib/utils'
-import { MOCK_ALL_USERS } from '@/mock/data'
+import { toast } from 'sonner'
+import { Badge, SkeletonTable } from '@/components/ui'
+import { usersApi } from '@/api/users'
+import { extractErrorMessage } from '@/api/client'
+import { formatCurrency, formatDate } from '@/lib/utils'
 import { PageTransition } from '@/components/motion/Animations'
-import { CreditCard, CheckCircle, Warning, XCircle } from '@phosphor-icons/react'
+import { usePageTitle } from '@/hooks/useEdgeCases'
+import { CheckCircle, Warning, XCircle } from '@phosphor-icons/react'
 
 const STATUS_CONFIG = {
     active: { badge: 'success', icon: CheckCircle, label: 'Active' },
     past_due: { badge: 'warning', icon: Warning, label: 'Past Due' },
     cancelled: { badge: 'error', icon: XCircle, label: 'Cancelled' },
+    incomplete: { badge: 'warning', icon: Warning, label: 'Incomplete' },
+    none: { badge: 'default', icon: XCircle, label: 'No Subscription' },
 }
 
 export default function AdminSubscriptionsPage() {
-    const clients = MOCK_ALL_USERS.filter(u => u.role === 'client' && u.subscription)
-    const active = clients.filter(c => c.subscription.status === 'active')
-    const pastDue = clients.filter(c => c.subscription.status === 'past_due')
+    usePageTitle('Subscriptions')
+    const [clients, setClients] = useState([])
+    const [loading, setLoading] = useState(true)
+
+    useEffect(() => {
+        let active = true
+        usersApi.list({ role: 'client' })
+            .then((resp) => {
+                // usersApi.list returns the raw enveloped body { status, data: { results } }
+                const results = resp.data?.results ?? resp.results ?? []
+                if (active) setClients(results.filter(c => c.subscription))
+            })
+            .catch((error) => { if (active) toast.error('Could not load subscribers', { description: extractErrorMessage(error) }) })
+            .finally(() => { if (active) setLoading(false) })
+        return () => { active = false }
+    }, [])
+
+    if (loading) return <div style={{ maxWidth: 1000, margin: '0 auto' }}><SkeletonTable /></div>
+
+    const active = clients.filter(c => c.subscription?.status === 'active')
+    const pastDue = clients.filter(c => c.subscription?.status === 'past_due')
 
     return (
         <div style={{ maxWidth: 1000, margin: '0 auto' }}>
             <div className="page-section">
                 <h1 className="heading-1">Subscriptions</h1>
-                <p className="muted-text" style={{ marginTop: 4 }}>{clients.length} subscribers · {formatCurrency(clients.length * 199)}/mo MRR</p>
+                <p className="muted-text" style={{ marginTop: 4 }}>{clients.length} subscribers · {formatCurrency(active.length * 199)}/mo MRR</p>
             </div>
 
             <div className="page-section grid-3col">
@@ -38,26 +61,6 @@ export default function AdminSubscriptionsPage() {
                 </div>
             </div>
 
-            {/* Recent Subscription Events */}
-            <div className="page-section">
-                <div className="section-header"><h2 className="heading-2">Recent Events</h2></div>
-                <Card>
-                    {[
-                        { type: 'new', text: 'Mark Rodriguez subscribed to Butler Premium', time: '2h ago', color: '#22C55E', icon: '🎉' },
-                        { type: 'cancelled', text: 'Priya Patel cancelled their subscription', time: '1d ago', color: '#EF4444', icon: '🚪' },
-                        { type: 'failed', text: 'Payment failed for Emily Chen ($199)', time: '2d ago', color: '#F59E0B', icon: '⚠️' },
-                        { type: 'reactivated', text: 'John Davis reactivated their subscription', time: '3d ago', color: '#3B82F6', icon: '🔄' },
-                        { type: 'new', text: 'Sarah Kim subscribed to Butler Premium', time: '5d ago', color: '#22C55E', icon: '🎉' },
-                    ].map((evt, i) => (
-                        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 0', borderBottom: i < 4 ? '1px solid #1F1F23' : 'none' }}>
-                            <span style={{ fontSize: 16 }}>{evt.icon}</span>
-                            <p style={{ flex: 1, fontSize: 14, color: '#A1A1AA' }}>{evt.text}</p>
-                            <span style={{ fontSize: 12, color: '#71717A', flexShrink: 0 }}>{evt.time}</span>
-                        </div>
-                    ))}
-                </Card>
-            </div>
-
             <div className="page-section">
                 <div className="section-header"><h2 className="heading-2">All Subscribers</h2></div>
                 <div style={{ backgroundColor: '#111113', border: '1px solid #27272A', borderRadius: 14, overflow: 'hidden' }}>
@@ -71,7 +74,7 @@ export default function AdminSubscriptionsPage() {
                         </thead>
                         <tbody>
                             {clients.map(c => {
-                                const config = STATUS_CONFIG[c.subscription.status] || STATUS_CONFIG.active
+                                const config = STATUS_CONFIG[c.subscription?.status] || STATUS_CONFIG.none
                                 return (
                                     <tr key={c.id} style={{ borderBottom: '1px solid #1F1F23' }}>
                                         <td style={{ padding: '14px 16px' }}>
@@ -87,8 +90,8 @@ export default function AdminSubscriptionsPage() {
                                         </td>
                                         <td style={{ padding: '14px 16px', color: '#A1A1AA' }}>Butler Premium</td>
                                         <td style={{ padding: '14px 16px' }}><Badge variant={config.badge} size="sm">{config.label}</Badge></td>
-                                        <td style={{ padding: '14px 16px', color: '#71717A', fontSize: 13 }}>{c.subscription.startDate}</td>
-                                        <td style={{ padding: '14px 16px', fontWeight: 500, color: '#F5F5F4' }}>$199/mo</td>
+                                        <td style={{ padding: '14px 16px', color: '#71717A', fontSize: 13 }}>{c.subscription?.startDate ? formatDate(c.subscription.startDate) : '—'}</td>
+                                        <td style={{ padding: '14px 16px', fontWeight: 500, color: '#F5F5F4' }}>{c.subscription?.plan || '$199/month'}</td>
                                     </tr>
                                 )
                             })}

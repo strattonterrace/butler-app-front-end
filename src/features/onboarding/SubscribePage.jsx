@@ -1,6 +1,10 @@
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { toast } from 'sonner'
 import { Button, Card } from '@/components/ui'
 import { useAuthStore } from '@/store/authStore'
+import { subscriptionsApi } from '@/api/subscriptions'
+import { extractErrorMessage } from '@/api/client'
 import { Check, Crown, ShieldCheck, Truck, EnvelopeSimple, Star, Lightning } from '@phosphor-icons/react'
 
 const FEATURES = [
@@ -14,7 +18,43 @@ const FEATURES = [
 
 export default function SubscribePage() {
     const navigate = useNavigate()
-    const { currentUser } = useAuthStore()
+    const { currentUser, isAuthenticated } = useAuthStore()
+    const [searchParams, setSearchParams] = useSearchParams()
+    const [checkoutLoading, setCheckoutLoading] = useState(false)
+
+    const subIsActive = currentUser?.subscription?.status === 'active'
+
+    // Stripe sends the user back here with ?cancelled=true if they abandon checkout
+    useEffect(() => {
+        if (searchParams.get('cancelled') === 'true') {
+            toast.info('Checkout cancelled', { description: 'You can subscribe whenever you\'re ready.' })
+            setSearchParams({}, { replace: true })
+        }
+    }, [searchParams, setSearchParams])
+
+    const handleSubscribe = async () => {
+        if (!isAuthenticated) {
+            navigate('/register')
+            return
+        }
+        if (subIsActive) {
+            navigate('/dashboard')
+            return
+        }
+        setCheckoutLoading(true)
+        try {
+            const { checkoutUrl } = await subscriptionsApi.createCheckout()
+            window.location.assign(checkoutUrl) // hand off to Stripe-hosted checkout
+        } catch (error) {
+            const alreadyActive = error?.response?.status === 409
+            if (alreadyActive) {
+                navigate('/dashboard')
+                return
+            }
+            toast.error('Could not start checkout', { description: extractErrorMessage(error) })
+            setCheckoutLoading(false)
+        }
+    }
 
     return (
         <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#0A0A0B', padding: 16 }}>
@@ -54,18 +94,29 @@ export default function SubscribePage() {
                         ))}
                     </div>
 
-                    {/* M2: Stripe Checkout replaces this button */}
                     <Button
                         size="lg"
-                        onClick={() => navigate('/dashboard')}
+                        loading={checkoutLoading}
+                        onClick={handleSubscribe}
                         style={{ width: '100%', height: 52, fontSize: 16 }}
                     >
-                        Continue to Dashboard
+                        {subIsActive ? 'Continue to Dashboard' : 'Subscribe — $199/month'}
                     </Button>
 
                     <p style={{ fontSize: 12, color: '#52525B', marginTop: 12 }}>
-                        Stripe payment coming soon — subscription billing activates in the next update.
+                        {subIsActive
+                            ? 'Your membership is active.'
+                            : 'Secure checkout powered by Stripe. Cancel anytime from Settings.'}
                     </p>
+
+                    {!subIsActive && isAuthenticated && (
+                        <button
+                            onClick={() => navigate('/dashboard')}
+                            style={{ marginTop: 16, fontSize: 13, color: '#71717A', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
+                        >
+                            Skip for now — explore the dashboard first
+                        </button>
+                    )}
                 </div>
             </div>
         </div>

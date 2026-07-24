@@ -1,7 +1,8 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'
 import { authApi } from '@/api/auth'
+import { subscriptionsApi } from '@/api/subscriptions'
 import { extractErrorMessage } from '@/api/client'
 import { toast } from 'sonner'
 import { Button, Input, Card } from '@/components/ui'
@@ -101,9 +102,65 @@ export default function SettingsPage() {
         navigate('/login')
     }
 
-    // ── Subscription display ──────────────────────────────────────────────────
-    const sub = currentUser?.subscription
+    // ── Subscription (live from the billing API) ──────────────────────────────
+    const [sub, setSub] = useState(null)
+    const [subActionLoading, setSubActionLoading] = useState(false)
+    const [showCancelConfirm, setShowCancelConfirm] = useState(false)
+
+    useEffect(() => {
+        let cancelled = false
+        subscriptionsApi.status()
+            .then((data) => { if (!cancelled) setSub(data) })
+            .catch(() => { /* card falls back to the inactive state */ })
+        return () => { cancelled = true }
+    }, [])
+
     const subIsActive = sub?.status === 'active'
+    const subIsPastDue = sub?.status === 'past_due'
+    const formatBillingDate = (iso) =>
+        iso ? new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : null
+
+    const handleCancelSubscription = async () => {
+        setSubActionLoading(true)
+        try {
+            const updated = await subscriptionsApi.cancel()
+            setSub(updated)
+            setShowCancelConfirm(false)
+            toast.success('Subscription cancelled', {
+                description: updated.currentPeriodEnd
+                    ? `You keep full access until ${formatBillingDate(updated.currentPeriodEnd)}.`
+                    : 'You keep full access until the end of your billing period.',
+            })
+        } catch (error) {
+            toast.error('Cancellation failed', { description: extractErrorMessage(error) })
+        } finally {
+            setSubActionLoading(false)
+        }
+    }
+
+    const handleReactivateSubscription = async () => {
+        setSubActionLoading(true)
+        try {
+            const updated = await subscriptionsApi.reactivate()
+            setSub(updated)
+            toast.success('Subscription resumed', { description: 'Your membership will continue as normal.' })
+        } catch (error) {
+            toast.error('Could not resume subscription', { description: extractErrorMessage(error) })
+        } finally {
+            setSubActionLoading(false)
+        }
+    }
+
+    const handleOpenBillingPortal = async () => {
+        setSubActionLoading(true)
+        try {
+            const { portalUrl } = await subscriptionsApi.portalSession()
+            window.location.assign(portalUrl)
+        } catch (error) {
+            toast.error('Could not open billing portal', { description: extractErrorMessage(error) })
+            setSubActionLoading(false)
+        }
+    }
 
     return (
         <div style={{ maxWidth: 800, margin: '0 auto' }}>
@@ -152,28 +209,68 @@ export default function SettingsPage() {
                         </div>
                     </Card>
 
-                    {/* Subscription */}
+                    {/* Subscription — live Stripe billing state */}
                     <Card style={{ marginBottom: 16 }}>
                         <h3 className="heading-2" style={{ marginBottom: 8 }}>Subscription</h3>
-                        {subIsActive ? (
+                        {subIsActive || subIsPastDue ? (
                             <>
                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid #1F1F23' }}>
                                     <div>
                                         <p style={{ fontSize: 14, fontWeight: 500, color: '#F5F5F4' }}>Butler Premium</p>
                                         <p style={{ fontSize: 13, color: '#71717A' }}>
-                                            {sub.plan}
-                                            {sub.nextBilling ? ` · Next billing ${new Date(sub.nextBilling).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}` : ''}
+                                            ${Number(sub.planAmount || 199).toFixed(0)}/month
+                                            {sub.cancelAtPeriodEnd && sub.currentPeriodEnd
+                                                ? ` · Ends ${formatBillingDate(sub.currentPeriodEnd)}`
+                                                : sub.currentPeriodEnd
+                                                    ? ` · Next billing ${formatBillingDate(sub.currentPeriodEnd)}`
+                                                    : ''}
                                         </p>
                                     </div>
-                                    <span style={{ padding: '4px 10px', borderRadius: 999, fontSize: 11, fontWeight: 600, backgroundColor: 'rgba(34,197,94,0.1)', color: '#22C55E', border: '1px solid rgba(34,197,94,0.25)' }}>
-                                        Active
-                                    </span>
+                                    {subIsPastDue ? (
+                                        <span style={{ padding: '4px 10px', borderRadius: 999, fontSize: 11, fontWeight: 600, backgroundColor: 'rgba(245,158,11,0.1)', color: '#F59E0B', border: '1px solid rgba(245,158,11,0.25)' }}>
+                                            Payment Issue
+                                        </span>
+                                    ) : sub.cancelAtPeriodEnd ? (
+                                        <span style={{ padding: '4px 10px', borderRadius: 999, fontSize: 11, fontWeight: 600, backgroundColor: 'rgba(245,158,11,0.1)', color: '#F59E0B', border: '1px solid rgba(245,158,11,0.25)' }}>
+                                            Cancelling
+                                        </span>
+                                    ) : (
+                                        <span style={{ padding: '4px 10px', borderRadius: 999, fontSize: 11, fontWeight: 600, backgroundColor: 'rgba(34,197,94,0.1)', color: '#22C55E', border: '1px solid rgba(34,197,94,0.25)' }}>
+                                            Active
+                                        </span>
+                                    )}
                                 </div>
-                                <div style={{ marginTop: 12 }}>
-                                    <Button variant="ghost" size="sm" style={{ color: '#EF4444' }}
-                                        onClick={() => toast.info('Subscription cancellation coming in M2', { description: 'Stripe integration is in the next milestone.' })}>
-                                        Cancel Subscription
+
+                                {subIsPastDue && (
+                                    <p style={{ fontSize: 13, color: '#F59E0B', marginTop: 12 }}>
+                                        Your last payment failed. Update your payment method to keep your membership.
+                                    </p>
+                                )}
+
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
+                                    <Button variant="secondary" size="sm" loading={subActionLoading} onClick={handleOpenBillingPortal}>
+                                        Manage Billing
                                     </Button>
+                                    {sub.cancelAtPeriodEnd ? (
+                                        <Button size="sm" loading={subActionLoading} onClick={handleReactivateSubscription}>
+                                            Resume Subscription
+                                        </Button>
+                                    ) : !showCancelConfirm ? (
+                                        <Button variant="ghost" size="sm" style={{ color: '#EF4444' }}
+                                            onClick={() => setShowCancelConfirm(true)}>
+                                            Cancel Subscription
+                                        </Button>
+                                    ) : (
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                            <span style={{ fontSize: 13, color: '#EF4444' }}>Cancel at the end of this billing period?</span>
+                                            <Button variant="destructive" size="sm" loading={subActionLoading} onClick={handleCancelSubscription}>
+                                                Yes, Cancel
+                                            </Button>
+                                            <Button variant="ghost" size="sm" onClick={() => setShowCancelConfirm(false)}>
+                                                Keep It
+                                            </Button>
+                                        </div>
+                                    )}
                                 </div>
                             </>
                         ) : (

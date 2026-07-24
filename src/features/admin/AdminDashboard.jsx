@@ -1,43 +1,85 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Card, SkeletonCard } from '@/components/ui'
 import { toast } from 'sonner'
 import { formatDate, formatCurrency } from '@/lib/utils'
-import { MOCK_METRICS, MOCK_ACTIVITY, MOCK_ALL_USERS, MOCK_CHART_DATA } from '@/mock/data'
+import { adminApi } from '@/api/admin'
+import { driversApi } from '@/api/drivers'
+import { extractErrorMessage } from '@/api/client'
 import { Link } from 'react-router-dom'
 import { PageTransition } from '@/components/motion/Animations'
 import { usePageTitle, useIsMobile } from '@/hooks/useEdgeCases'
-import { Users, Car, CreditCard, CurrencyDollar, ClockCounterClockwise, ArrowRight, TrendUp, CheckCircle, XCircle, ChartBar, Globe, Timer, ShoppingCart, Percent, Target } from '@phosphor-icons/react'
-import { AreaChart, Area, BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
+import { useUIStore } from '@/store/uiStore'
+import { Users, Car, CreditCard, CurrencyDollar, ClockCounterClockwise, ArrowRight, CheckCircle, ShoppingCart, Percent, UserPlus } from '@phosphor-icons/react'
 
-function MetricCard({ label, value, icon: Icon, trend, color = '#A1A1AA' }) {
+function MetricCard({ label, value, icon: Icon, color = '#A1A1AA' }) {
+    const { theme } = useUIStore()
+    const isLight = theme === 'light'
     return (
-        <div style={{ backgroundColor: '#111113', border: '1px solid #27272A', borderRadius: 'clamp(10px, 2vw, 14px)', padding: 'clamp(12px, 2vw, 16px) clamp(14px, 2.5vw, 20px)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-                <div style={{ width: 34, height: 34, borderRadius: 8, backgroundColor: '#1A1A1F', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Icon size={16} style={{ color }} />
-                </div>
-                {trend && <span style={{ display: 'flex', alignItems: 'center', gap: 2, fontSize: 11, color: '#22C55E', fontWeight: 600 }}><TrendUp size={11} weight="bold" />{trend}</span>}
+        <div style={{ backgroundColor: isLight ? '#FFFFFF' : '#111113', border: `1px solid ${isLight ? '#E4E4E7' : '#27272A'}`, borderRadius: 'clamp(10px, 2vw, 14px)', padding: 'clamp(12px, 2vw, 16px) clamp(14px, 2.5vw, 20px)' }}>
+            <div style={{ width: 34, height: 34, borderRadius: 8, backgroundColor: isLight ? '#F4F4F5' : '#1A1A1F', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 10 }}>
+                <Icon size={16} style={{ color }} />
             </div>
-            <p style={{ fontSize: 'clamp(18px, 4vw, 26px)', fontWeight: 700, color: '#F5F5F4', lineHeight: 1.1 }}>{value}</p>
+            <p style={{ fontSize: 'clamp(18px, 4vw, 26px)', fontWeight: 700, color: isLight ? '#1C1917' : '#F5F5F4', lineHeight: 1.1 }}>{value}</p>
             <p style={{ fontSize: 'clamp(10px, 1.5vw, 12px)', color: '#71717A', marginTop: 4 }}>{label}</p>
         </div>
     )
-}
-
-const CHART_TOOLTIP_STYLE = { backgroundColor: '#1A1A1F', border: '1px solid #27272A', borderRadius: 8, fontSize: 12, color: '#F5F5F4' }
-
-// Activity icon/color mapping
-const ACTIVITY_COLORS = {
-    order_completed: '#22C55E', order_assigned: '#8B5CF6', order_submitted: '#F59E0B',
-    order_pickup: '#3B82F6', order_cancelled: '#EF4444', subscription_new: '#C9A84C',
-    rating: '#F59E0B', driver_application: '#3B82F6',
 }
 
 export default function AdminDashboard() {
     usePageTitle('Admin Dashboard')
     const mobile = useIsMobile()
     const [loading, setLoading] = useState(true)
-    useEffect(() => { const t = setTimeout(() => setLoading(false), 600); return () => clearTimeout(t) }, [])
+    const [metrics, setMetrics] = useState(null)
+    const [activity, setActivity] = useState([])
+    const [pending, setPending] = useState([])
+    const [actingId, setActingId] = useState(null)
+
+    const load = useCallback(async () => {
+        const [m, a, p] = await Promise.all([
+            adminApi.metrics().catch(() => null),
+            adminApi.activity(20).catch(() => []),
+            driversApi.pending().catch(() => []),
+        ])
+        setMetrics(m)
+        setActivity(a)
+        setPending(p)
+    }, [])
+
+    useEffect(() => {
+        let active = true
+        load()
+            .catch((error) => { if (active) toast.error('Could not load dashboard', { description: extractErrorMessage(error) }) })
+            .finally(() => { if (active) setLoading(false) })
+        return () => { active = false }
+    }, [load])
+
+    const approve = async (driver) => {
+        setActingId(driver.id)
+        try {
+            await driversApi.approve(driver.id)
+            toast.success('Driver approved', { description: driver.name })
+            await load()
+        } catch (error) {
+            toast.error('Could not approve driver', { description: extractErrorMessage(error) })
+        } finally {
+            setActingId(null)
+        }
+    }
+
+    const reject = async (driver) => {
+        const reason = window.prompt(`Reject ${driver.name}'s application? Optional reason:`)
+        if (reason === null) return
+        setActingId(driver.id)
+        try {
+            await driversApi.reject(driver.id, reason.trim())
+            toast.success('Application declined', { description: driver.name })
+            await load()
+        } catch (error) {
+            toast.error('Could not reject driver', { description: extractErrorMessage(error) })
+        } finally {
+            setActingId(null)
+        }
+    }
 
     if (loading) return (
         <div style={{ maxWidth: 1100, margin: '0 auto' }}>
@@ -47,8 +89,7 @@ export default function AdminDashboard() {
         </div>
     )
 
-    const m = MOCK_METRICS
-    const pendingDrivers = MOCK_ALL_USERS.filter(u => u.role === 'driver' && u.approvalStatus === 'pending')
+    const m = metrics ?? {}
 
     return (
         <PageTransition>
@@ -58,103 +99,27 @@ export default function AdminDashboard() {
                     <p className="muted-text" style={{ marginTop: 4 }}>Platform command center — all territories, all data.</p>
                 </div>
 
-                {/* ── Platform Metrics ── */}
+                {/* ── Platform Metrics (real) ── */}
                 <div className="page-section">
                     <h2 className="heading-2" style={{ marginBottom: 12 }}>Platform Metrics</h2>
                     <div className="grid-stats">
-                        <MetricCard label="Active Clients" value={m.activeClients} icon={Users} trend="+3" color="#3B82F6" />
-                        <MetricCard label="Active Drivers" value={m.activeDrivers} icon={Car} trend="+1" color="#22C55E" />
-                        <MetricCard label="Active Territories" value={m.activeTerritories} icon={Globe} color="#8B5CF6" />
-                        <MetricCard label="Monthly Revenue (MRR)" value={formatCurrency(m.mrr)} icon={CurrencyDollar} trend="12%" color="#C9A84C" />
-                        <MetricCard label="Annual Revenue (ARR)" value={formatCurrency(m.arr)} icon={CurrencyDollar} color="#C9A84C" />
-                        <MetricCard label="Customer Acq. Cost" value={formatCurrency(m.cac)} icon={Target} color="#F97316" />
-                        <MetricCard label="Client Lifetime Value" value={formatCurrency(m.ltv)} icon={TrendUp} color="#22C55E" />
-                        <MetricCard label="LTV:CAC Ratio" value={`${m.ltvCacRatio}x`} icon={ChartBar} color="#3B82F6" />
-                        <MetricCard label="Client Churn Rate" value={`${(m.churnRate * 100).toFixed(1)}%`} icon={Percent} color="#EF4444" />
+                        <MetricCard label="Total Clients" value={m.totalClients ?? 0} icon={Users} color="#3B82F6" />
+                        <MetricCard label="Active Subscribers" value={m.activeSubscribers ?? 0} icon={CreditCard} color="#22C55E" />
+                        <MetricCard label="Total Drivers" value={m.totalDrivers ?? 0} icon={Car} color="#8B5CF6" />
+                        <MetricCard label="Monthly Revenue (MRR)" value={formatCurrency(Number(m.monthlyRevenue ?? 0))} icon={CurrencyDollar} color="#C9A84C" />
+                        <MetricCard label="Total Collected" value={formatCurrency(Number(m.totalRevenue ?? 0))} icon={CurrencyDollar} color="#C9A84C" />
+                        <MetricCard label="Churn Rate (30d)" value={`${((m.churnRate ?? 0) * 100).toFixed(1)}%`} icon={Percent} color="#EF4444" />
                     </div>
                 </div>
 
-                {/* ── Operational Metrics ── */}
+                {/* ── Operational Metrics (real) ── */}
                 <div className="page-section">
                     <h2 className="heading-2" style={{ marginBottom: 12 }}>Operational Metrics</h2>
                     <div className="grid-stats">
-                        <MetricCard label="Total Orders" value={m.totalOrders} icon={ShoppingCart} color="#A1A1AA" />
-                        <MetricCard label="Orders Today" value={m.ordersToday} icon={ShoppingCart} color="#F59E0B" />
-                        <MetricCard label="In Progress" value={m.ordersInProgress} icon={ClockCounterClockwise} color="#F97316" />
-                        <MetricCard label="Completed Today" value={m.completedToday} icon={CheckCircle} color="#22C55E" />
-                        <MetricCard label="Avg Completion Time" value={`${m.avgCompletionTime}m`} icon={Timer} color="#3B82F6" />
-                        <MetricCard label="Avg Orders / Client" value={m.avgOrdersPerClient} icon={Users} color="#8B5CF6" />
-                        <MetricCard label="Dispute Rate" value={`${(m.disputeRate * 100).toFixed(1)}%`} icon={XCircle} color="#EF4444" />
-                    </div>
-                </div>
-
-                {/* ── Charts ── */}
-                <div className="page-section">
-                    <h2 className="heading-2" style={{ marginBottom: 12 }}>Analytics</h2>
-                    <div className="grid-2col">
-                        {/* Orders Over Time */}
-                        <Card>
-                            <p style={{ fontSize: 13, fontWeight: 600, color: '#A1A1AA', marginBottom: 16 }}>Orders Over Time</p>
-                            <ResponsiveContainer width="100%" height={200}>
-                                <AreaChart data={MOCK_CHART_DATA.ordersOverTime}>
-                                    <defs><linearGradient id="goldGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#C9A84C" stopOpacity={0.3} /><stop offset="100%" stopColor="#C9A84C" stopOpacity={0} /></linearGradient></defs>
-                                    <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#71717A' }} axisLine={false} tickLine={false} />
-                                    <YAxis tick={{ fontSize: 11, fill: '#71717A' }} axisLine={false} tickLine={false} width={30} />
-                                    <Tooltip contentStyle={CHART_TOOLTIP_STYLE} />
-                                    <Area type="monotone" dataKey="orders" stroke="#C9A84C" strokeWidth={2} fill="url(#goldGrad)" />
-                                </AreaChart>
-                            </ResponsiveContainer>
-                        </Card>
-
-                        {/* Revenue by Territory */}
-                        <Card>
-                            <p style={{ fontSize: 13, fontWeight: 600, color: '#A1A1AA', marginBottom: 16 }}>Revenue by Territory</p>
-                            <ResponsiveContainer width="100%" height={200}>
-                                <BarChart data={MOCK_CHART_DATA.revenueByTerritory}>
-                                    <XAxis dataKey="territory" tick={{ fontSize: 10, fill: '#71717A' }} axisLine={false} tickLine={false} />
-                                    <YAxis tick={{ fontSize: 11, fill: '#71717A' }} axisLine={false} tickLine={false} width={40} />
-                                    <Tooltip contentStyle={CHART_TOOLTIP_STYLE} formatter={(v) => formatCurrency(v)} />
-                                    <Bar dataKey="revenue" fill="#C9A84C" radius={[4, 4, 0, 0]} />
-                                </BarChart>
-                            </ResponsiveContainer>
-                        </Card>
-
-                        {/* Client Growth */}
-                        <Card>
-                            <p style={{ fontSize: 13, fontWeight: 600, color: '#A1A1AA', marginBottom: 16 }}>Client Growth</p>
-                            <ResponsiveContainer width="100%" height={200}>
-                                <LineChart data={MOCK_CHART_DATA.clientGrowth}>
-                                    <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#71717A' }} axisLine={false} tickLine={false} />
-                                    <YAxis tick={{ fontSize: 11, fill: '#71717A' }} axisLine={false} tickLine={false} width={30} />
-                                    <Tooltip contentStyle={CHART_TOOLTIP_STYLE} />
-                                    <Line type="monotone" dataKey="clients" stroke="#22C55E" strokeWidth={2} dot={{ r: 3, fill: '#22C55E' }} />
-                                </LineChart>
-                            </ResponsiveContainer>
-                        </Card>
-
-                        {/* Order Status Distribution */}
-                        <Card>
-                            <p style={{ fontSize: 13, fontWeight: 600, color: '#A1A1AA', marginBottom: 16 }}>Order Status Distribution</p>
-                            <div style={{ display: 'flex', flexDirection: mobile ? 'column' : 'row', alignItems: 'center', gap: 16 }}>
-                                <ResponsiveContainer width={mobile ? '100%' : '50%'} height={mobile ? 150 : 180}>
-                                    <PieChart>
-                                        <Pie data={MOCK_CHART_DATA.orderStatusDist} dataKey="value" cx="50%" cy="50%" innerRadius={40} outerRadius={70} paddingAngle={2}>
-                                            {MOCK_CHART_DATA.orderStatusDist.map((entry, i) => <Cell key={i} fill={entry.color} />)}
-                                        </Pie>
-                                        <Tooltip contentStyle={CHART_TOOLTIP_STYLE} />
-                                    </PieChart>
-                                </ResponsiveContainer>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                                    {MOCK_CHART_DATA.orderStatusDist.map(s => (
-                                        <div key={s.status} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                            <div style={{ width: 8, height: 8, borderRadius: 2, backgroundColor: s.color, flexShrink: 0 }} />
-                                            <span style={{ fontSize: 11, color: '#A1A1AA' }}>{s.status}</span>
-                                            <span style={{ fontSize: 11, color: '#71717A', marginLeft: 'auto' }}>{s.value}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </Card>
+                        <MetricCard label="Total Requests" value={m.totalRequests ?? 0} icon={ShoppingCart} color="#A1A1AA" />
+                        <MetricCard label="Active Requests" value={m.activeRequests ?? 0} icon={ClockCounterClockwise} color="#F97316" />
+                        <MetricCard label="Completed Today" value={m.completedRequestsToday ?? 0} icon={CheckCircle} color="#22C55E" />
+                        <MetricCard label="Pending Driver Apps" value={m.pendingDriverApplications ?? 0} icon={UserPlus} color="#F59E0B" />
                     </div>
                 </div>
 
@@ -168,17 +133,21 @@ export default function AdminDashboard() {
                                 <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: '#22C55E', animation: 'skeleton-pulse 2s ease-in-out infinite' }} /> Live
                             </span>
                         </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, maxHeight: 360, overflowY: 'auto' }}>
-                            {MOCK_ACTIVITY.map(act => (
-                                <div key={act.id} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '8px 0', borderBottom: '1px solid #1F1F23' }}>
-                                    <div style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: ACTIVITY_COLORS[act.type] || '#71717A', marginTop: 6, flexShrink: 0 }} />
-                                    <div style={{ flex: 1, minWidth: 0 }}>
-                                        <p style={{ fontSize: 13, color: '#A1A1AA', lineHeight: 1.4 }}>{act.message}</p>
-                                        <p style={{ fontSize: 11, color: '#52525B' }}>{formatDate(act.timestamp, { format: 'relative' })}</p>
+                        {activity.length > 0 ? (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, maxHeight: 360, overflowY: 'auto' }}>
+                                {activity.map(act => (
+                                    <div key={act.id} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '8px 0', borderBottom: '1px solid #1F1F23' }}>
+                                        <div style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: '#71717A', marginTop: 6, flexShrink: 0 }} />
+                                        <div style={{ flex: 1, minWidth: 0 }}>
+                                            <p style={{ fontSize: 13, color: '#A1A1AA', lineHeight: 1.4 }}>{act.message}</p>
+                                            <p style={{ fontSize: 11, color: '#52525B' }}>{formatDate(act.createdAt, { format: 'relative' })}</p>
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
-                        </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <p style={{ textAlign: 'center', fontSize: 14, color: '#71717A', padding: '32px 0' }}>No activity yet.</p>
+                        )}
                     </Card>
 
                     {/* Pending Approvals */}
@@ -186,23 +155,23 @@ export default function AdminDashboard() {
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
                             <h2 className="heading-2">
                                 Pending Approvals
-                                {pendingDrivers.length > 0 && <span style={{ marginLeft: 8, fontSize: 14, fontWeight: 400, color: '#F59E0B' }}>({pendingDrivers.length})</span>}
+                                {pending.length > 0 && <span style={{ marginLeft: 8, fontSize: 14, fontWeight: 400, color: '#F59E0B' }}>({pending.length})</span>}
                             </h2>
                             <Link to="/admin/drivers" style={{ fontSize: 13, color: '#C9A84C', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4 }}>
                                 View all <ArrowRight size={13} />
                             </Link>
                         </div>
-                        {pendingDrivers.length > 0 ? (
+                        {pending.length > 0 ? (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                                {pendingDrivers.map(driver => (
+                                {pending.map(driver => (
                                     <div key={driver.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 12, borderRadius: 10, backgroundColor: '#1A1A1F' }}>
                                         <div>
-                                            <p style={{ fontSize: 14, fontWeight: 500, color: '#F5F5F4' }}>{driver.fullName}</p>
-                                            <p style={{ fontSize: 12, color: '#71717A' }}>{driver.vehicle?.make} {driver.vehicle?.model} {driver.vehicle?.year}</p>
+                                            <p style={{ fontSize: 14, fontWeight: 500, color: '#F5F5F4' }}>{driver.name}</p>
+                                            <p style={{ fontSize: 12, color: '#71717A' }}>{driver.vehicle}</p>
                                         </div>
                                         <div style={{ display: 'flex', gap: 8 }}>
-                                            <button onClick={() => toast.success('Driver approved', { description: driver.fullName })} style={{ height: 30, padding: '0 10px', borderRadius: 6, fontSize: 12, fontWeight: 500, backgroundColor: 'rgba(34,197,94,0.1)', color: '#22C55E', border: '1px solid rgba(34,197,94,0.2)', cursor: 'pointer' }}>Approve</button>
-                                            <button onClick={() => toast.error('Driver rejected', { description: driver.fullName })} style={{ height: 30, padding: '0 10px', borderRadius: 6, fontSize: 12, fontWeight: 500, backgroundColor: 'rgba(239,68,68,0.1)', color: '#EF4444', border: '1px solid rgba(239,68,68,0.2)', cursor: 'pointer' }}>Reject</button>
+                                            <button disabled={actingId === driver.id} onClick={() => approve(driver)} style={{ height: 30, padding: '0 10px', borderRadius: 6, fontSize: 12, fontWeight: 500, backgroundColor: 'rgba(34,197,94,0.1)', color: '#22C55E', border: '1px solid rgba(34,197,94,0.2)', cursor: 'pointer' }}>Approve</button>
+                                            <button disabled={actingId === driver.id} onClick={() => reject(driver)} style={{ height: 30, padding: '0 10px', borderRadius: 6, fontSize: 12, fontWeight: 500, backgroundColor: 'rgba(239,68,68,0.1)', color: '#EF4444', border: '1px solid rgba(239,68,68,0.2)', cursor: 'pointer' }}>Reject</button>
                                         </div>
                                     </div>
                                 ))}

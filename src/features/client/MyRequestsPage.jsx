@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { useAuthStore } from '@/store/authStore'
+import { toast } from 'sonner'
+import { requestsApi } from '@/api/requests'
+import { extractErrorMessage } from '@/api/client'
 import { Badge, Button, SkeletonCard } from '@/components/ui'
 import { formatDate, SERVICE_TYPES } from '@/lib/utils'
-import { MOCK_REQUESTS } from '@/mock/data'
 import { PageTransition } from '@/components/motion/Animations'
 import { usePageTitle, useDebouncedValue, useIsMobile } from '@/hooks/useEdgeCases'
+import { useUIStore } from '@/store/uiStore'
 import { Basket, Pill, TShirt, Package, ArrowUUpLeft, CookingPot, MagnifyingGlass, Funnel, MapPin, CalendarBlank } from '@phosphor-icons/react'
 
 const SERVICE_ICONS = { grocery: Basket, pharmacy: Pill, dry_cleaning: TShirt, package: Package, retail_return: ArrowUUpLeft, food_pickup: CookingPot }
@@ -20,23 +22,35 @@ const FILTER_TABS = [
 ]
 
 export default function MyRequestsPage() {
-    const { currentUser } = useAuthStore()
     const [activeTab, setActiveTab] = useState('all')
     const [search, setSearch] = useState('')
     const debouncedSearch = useDebouncedValue(search)
     const mobile = useIsMobile()
+    const { theme } = useUIStore()
+    const isLight = theme === 'light'
     usePageTitle('My Requests')
 
-    const myRequests = MOCK_REQUESTS.filter(r => r.clientId === currentUser?.id)
+    const [myRequests, setMyRequests] = useState([])
+    const [loading, setLoading] = useState(true)
+
+    // Backend scopes /requests/ to the authenticated client via visible_to().
+    useEffect(() => {
+        let active = true
+        requestsApi.list({ ordering: '-created_at' })
+            .then((data) => { if (active) setMyRequests(data.results ?? []) })
+            .catch((error) => {
+                if (active) toast.error('Could not load your requests', { description: extractErrorMessage(error) })
+            })
+            .finally(() => { if (active) setLoading(false) })
+        return () => { active = false }
+    }, [])
+
     const filtered = myRequests.filter(r => {
         if (activeTab === 'active') return ['submitted', 'reviewed', 'assigned', 'in_progress'].includes(r.status)
         if (activeTab === 'completed') return r.status === 'completed'
         if (activeTab === 'cancelled') return r.status === 'cancelled'
         return true
     }).filter(r => !debouncedSearch || r.title.toLowerCase().includes(debouncedSearch.toLowerCase()))
-
-    const [loading, setLoading] = useState(true)
-    useEffect(() => { const t = setTimeout(() => setLoading(false), 500); return () => clearTimeout(t) }, [])
 
     if (loading) return <div style={{ maxWidth: 900, margin: '0 auto' }}><SkeletonCard /><SkeletonCard /><SkeletonCard /></div>
 
@@ -55,7 +69,7 @@ export default function MyRequestsPage() {
 
                 {/* Filters */}
                 <div className="page-section" style={{ display: 'flex', alignItems: 'center', gap: mobile ? 8 : 12, flexWrap: 'wrap' }}>
-                    <div style={{ display: 'flex', backgroundColor: '#111113', borderRadius: 10, border: '1px solid #27272A', overflow: 'hidden' }}>
+                    <div style={{ display: 'flex', backgroundColor: isLight ? '#F0F0F0' : '#111113', borderRadius: 10, border: `1px solid ${isLight ? '#D4D4D4' : '#27272A'}`, overflow: 'hidden' }}>
                         {FILTER_TABS.map(tab => (
                             <button key={tab.key} onClick={() => setActiveTab(tab.key)}
                                 style={{
@@ -72,9 +86,12 @@ export default function MyRequestsPage() {
                             placeholder="Search requests..."
                             value={search} onChange={(e) => setSearch(e.target.value)}
                             style={{
-                                width: '100%', height: 38, borderRadius: 10, border: '1px solid #27272A',
-                                backgroundColor: '#1E1E24', padding: '0 12px 0 36px', fontSize: 13,
-                                color: '#F5F5F4', outline: 'none', fontFamily: 'inherit',
+                                width: '100%', height: 38, borderRadius: 10,
+                                border: `1px solid ${isLight ? '#D4D4D4' : '#27272A'}`,
+                                backgroundColor: isLight ? '#F4F4F5' : '#1E1E24',
+                                padding: '0 12px 0 36px', fontSize: 13,
+                                color: isLight ? '#1C1917' : '#F5F5F4',
+                                outline: 'none', fontFamily: 'inherit',
                             }}
                         />
                     </div>
@@ -88,18 +105,19 @@ export default function MyRequestsPage() {
                             <Link key={req.id} to={`/requests/${req.id}`} style={{ textDecoration: 'none' }}>
                                 <div style={{
                                     display: 'flex', alignItems: 'center', gap: mobile ? 10 : 16, padding: mobile ? '12px 14px' : '16px 20px',
-                                    backgroundColor: '#111113', border: '1px solid #27272A', borderRadius: mobile ? 12 : 14,
-                                    cursor: 'pointer', transition: 'all 150ms', overflow: 'hidden',
+                                    backgroundColor: isLight ? '#FFFFFF' : '#111113',
+                                    border: `1px solid ${isLight ? '#E4E4E7' : '#27272A'}`,
+                                    borderRadius: mobile ? 12 : 14, cursor: 'pointer', transition: 'all 150ms', overflow: 'hidden',
                                 }}
                                     onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'rgba(201,168,76,0.3)'; e.currentTarget.style.transform = 'translateY(-1px)' }}
-                                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#27272A'; e.currentTarget.style.transform = 'none' }}
+                                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = isLight ? '#E4E4E7' : '#27272A'; e.currentTarget.style.transform = 'none' }}
                                 >
-                                    <div style={{ width: mobile ? 36 : 42, height: mobile ? 36 : 42, borderRadius: mobile ? 8 : 10, backgroundColor: '#1A1A1F', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#A1A1AA', flexShrink: 0 }}>
+                                    <div style={{ width: mobile ? 36 : 42, height: mobile ? 36 : 42, borderRadius: mobile ? 8 : 10, backgroundColor: isLight ? '#F4F4F5' : '#1A1A1F', display: 'flex', alignItems: 'center', justifyContent: 'center', color: isLight ? '#44403C' : '#A1A1AA', flexShrink: 0 }}>
                                         <ServiceIcon size={mobile ? 18 : 20} weight="regular" />
                                     </div>
                                     <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
-                                            <p style={{ fontSize: mobile ? 13 : 14, fontWeight: 600, color: '#F5F5F4', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: mobile ? '160px' : 'none' }}>{req.title}</p>
+                                            <p style={{ fontSize: mobile ? 13 : 14, fontWeight: 600, color: isLight ? '#1C1917' : '#F5F5F4', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: mobile ? '160px' : 'none' }}>{req.title}</p>
                                             <Badge variant={STATUS_BADGE[req.status]} size="sm">{STATUS_LABEL[req.status]}</Badge>
                                         </div>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: mobile ? 8 : 16, fontSize: mobile ? 11 : 12, color: '#71717A', flexWrap: 'wrap' }}>
@@ -110,7 +128,7 @@ export default function MyRequestsPage() {
                                     </div>
                                     {!mobile && req.driverName && (
                                         <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                                            <p style={{ fontSize: 12, color: '#A1A1AA' }}>{req.driverName}</p>
+                                            <p style={{ fontSize: 12, color: isLight ? '#44403C' : '#A1A1AA' }}>{req.driverName}</p>
                                             <p style={{ fontSize: 11, color: '#71717A', textTransform: 'capitalize' }}>{req.urgency}</p>
                                         </div>
                                     )}
