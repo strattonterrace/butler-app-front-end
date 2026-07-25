@@ -43,9 +43,10 @@ export class ErrorBoundary extends Component {
                         >
                             Refresh Page
                         </button>
-                        {this.state.error && (
+                        {/* Technical details only in development — never shown to real users. */}
+                        {import.meta.env.DEV && this.state.error && (
                             <details style={{ marginTop: 24, textAlign: 'left' }}>
-                                <summary style={{ fontSize: 12, color: '#71717A', cursor: 'pointer' }}>Error details</summary>
+                                <summary style={{ fontSize: 12, color: '#71717A', cursor: 'pointer' }}>Error details (dev only)</summary>
                                 <pre style={{ fontSize: 11, color: '#EF4444', marginTop: 8, padding: 12, backgroundColor: '#111113', borderRadius: 8, overflow: 'auto', maxHeight: 120 }}>
                                     {this.state.error.toString()}
                                 </pre>
