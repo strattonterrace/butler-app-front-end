@@ -73,7 +73,8 @@ export function Sidebar() {
                 ))}
             </nav>
 
-            {/* Theme Toggle */}
+            {/* Theme Toggle — hidden until M3 light-mode theming pass */}
+            {false && (
             <div style={{ borderTop: '1px solid #27272A', padding: 12 }}>
                 <button
                     onClick={toggleTheme}
@@ -97,6 +98,7 @@ export function Sidebar() {
                     )}
                 </button>
             </div>
+            )}
 
             {/* Collapse */}
             <div style={{ borderTop: '1px solid #27272A', padding: 12 }}>

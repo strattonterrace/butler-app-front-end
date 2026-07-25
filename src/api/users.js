@@ -16,7 +16,9 @@ export const usersApi = {
         if (search) params.search = search
         if (page > 1) params.page = page
         const { data } = await apiClient.get('/users/', { params })
-        return data // { count, next, previous, results: [...] }
+        // List endpoints are wrapped in the pagination envelope
+        // { status, data: { results, count, next, previous } } — unwrap to flat.
+        return data.data ?? data // { results, count, next, previous }
     },
 
     get: async (id) => {

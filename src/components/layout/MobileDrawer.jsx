@@ -100,7 +100,8 @@ export function MobileDrawer() {
                     ))}
                 </nav>
 
-                {/* Theme Toggle */}
+                {/* Theme Toggle — hidden until M3 light-mode theming pass */}
+                {false && (
                 <div style={{ borderTop: `1px solid ${isLight ? '#D4D4D4' : '#27272A'}`, padding: 12 }}>
                     <button
                         onClick={() => { toggleTheme(); close() }}
@@ -118,6 +119,7 @@ export function MobileDrawer() {
                         <span>{isLight ? 'Switch to Dark Mode' : 'Switch to Light Mode'}</span>
                     </button>
                 </div>
+                )}
 
                 {/* User info */}
                 <div style={{ borderTop: `1px solid ${isLight ? '#D4D4D4' : '#27272A'}`, padding: 16, display: 'flex', alignItems: 'center', gap: 12 }}>
