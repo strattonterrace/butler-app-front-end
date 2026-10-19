@@ -18,14 +18,14 @@ const NAV_COLS = [
         title: 'Company',
         links: [
             { label: 'About Butler', href: '#hero' },
-            { label: 'Contact',      href: 'mailto:hello@butlerapp.com' },
+            { label: 'Contact',      href: 'mailto:hello@mybutlerclub.com' },
         ],
     },
     {
         title: 'Legal',
         links: [
-            { label: 'Terms of Service', href: '#' },
-            { label: 'Privacy Policy',   href: '#' },
+            { label: 'Terms of Service', to: '/terms' },
+            { label: 'Privacy Policy',   to: '/privacy' },
         ],
     },
 ]

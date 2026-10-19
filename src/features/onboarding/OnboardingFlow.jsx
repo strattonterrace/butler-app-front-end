@@ -267,6 +267,12 @@ function AccountForm({ busy, setBusy, onCreated, registerUser }) {
                 {errors.confirmPassword && <p style={ERR}>{errors.confirmPassword.message}</p>}
             </div>
             <Button type="submit" size="lg" loading={busy} style={{ width: '100%' }}>Continue</Button>
+            <p style={{ fontSize: 12, color: '#71717A', textAlign: 'center', marginTop: 4, lineHeight: 1.5 }}>
+                By continuing, you agree to Butler&apos;s{' '}
+                <a href="/terms" target="_blank" rel="noopener noreferrer" style={{ color: '#C9A84C', textDecoration: 'none' }}>Terms of Service</a>
+                {' '}and{' '}
+                <a href="/privacy" target="_blank" rel="noopener noreferrer" style={{ color: '#C9A84C', textDecoration: 'none' }}>Privacy Policy</a>.
+            </p>
         </form>
     )
 }
