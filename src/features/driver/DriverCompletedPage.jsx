@@ -39,11 +39,11 @@ export default function DriverCompletedPage() {
                     {completed.map(req => (
                         <div key={req.id} style={{
                             display: 'flex', alignItems: 'center', gap: 16, padding: '16px 20px',
-                            backgroundColor: '#111113', border: '1px solid #27272A', borderRadius: 14,
+                            backgroundColor: 'var(--c-surface)', border: '1px solid var(--c-border)', borderRadius: 14,
                         }}>
                             <CheckCircle size={24} weight="fill" style={{ color: '#22C55E', flexShrink: 0 }} />
                             <div style={{ flex: 1, minWidth: 0 }}>
-                                <p style={{ fontSize: 14, fontWeight: 600, color: '#F5F5F4' }}>{req.title}</p>
+                                <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--c-text)' }}>{req.title}</p>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: 12, color: '#71717A', marginTop: 4 }}>
                                     <span>{SERVICE_TYPES[req.serviceType]?.label}</span>
                                     <span>for {req.clientName}</span>
@@ -51,7 +51,7 @@ export default function DriverCompletedPage() {
                                 </div>
                             </div>
                             {req.completionNotes && (
-                                <p style={{ fontSize: 12, color: '#A1A1AA', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flexShrink: 0 }}>{req.completionNotes}</p>
+                                <p style={{ fontSize: 12, color: 'var(--c-text-2)', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flexShrink: 0 }}>{req.completionNotes}</p>
                             )}
                         </div>
                     ))}

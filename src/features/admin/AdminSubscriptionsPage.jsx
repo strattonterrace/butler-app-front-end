@@ -47,26 +47,26 @@ export default function AdminSubscriptionsPage() {
             </div>
 
             <div className="page-section grid-3col">
-                <div style={{ backgroundColor: '#111113', border: '1px solid #27272A', borderRadius: 'clamp(10px, 2vw, 14px)', padding: 'clamp(12px, 2vw, 16px) clamp(14px, 2.5vw, 20px)' }}>
+                <div style={{ backgroundColor: 'var(--c-surface)', border: '1px solid var(--c-border)', borderRadius: 'clamp(10px, 2vw, 14px)', padding: 'clamp(12px, 2vw, 16px) clamp(14px, 2.5vw, 20px)' }}>
                     <p style={{ fontSize: 'clamp(18px, 4vw, 28px)', fontWeight: 700, color: '#22C55E', lineHeight: 1.1 }}>{active.length}</p>
                     <p style={{ fontSize: 12, color: '#71717A', marginTop: 4 }}>Active</p>
                 </div>
-                <div style={{ backgroundColor: '#111113', border: '1px solid #27272A', borderRadius: 'clamp(10px, 2vw, 14px)', padding: 'clamp(12px, 2vw, 16px) clamp(14px, 2.5vw, 20px)' }}>
+                <div style={{ backgroundColor: 'var(--c-surface)', border: '1px solid var(--c-border)', borderRadius: 'clamp(10px, 2vw, 14px)', padding: 'clamp(12px, 2vw, 16px) clamp(14px, 2.5vw, 20px)' }}>
                     <p style={{ fontSize: 'clamp(18px, 4vw, 28px)', fontWeight: 700, color: '#F59E0B', lineHeight: 1.1 }}>{pastDue.length}</p>
                     <p style={{ fontSize: 12, color: '#71717A', marginTop: 4 }}>Past Due</p>
                 </div>
-                <div style={{ backgroundColor: '#111113', border: '1px solid #27272A', borderRadius: 'clamp(10px, 2vw, 14px)', padding: 'clamp(12px, 2vw, 16px) clamp(14px, 2.5vw, 20px)' }}>
-                    <p style={{ fontSize: 'clamp(18px, 4vw, 28px)', fontWeight: 700, color: '#F5F5F4', lineHeight: 1.1 }}>{formatCurrency(active.length * 199)}</p>
+                <div style={{ backgroundColor: 'var(--c-surface)', border: '1px solid var(--c-border)', borderRadius: 'clamp(10px, 2vw, 14px)', padding: 'clamp(12px, 2vw, 16px) clamp(14px, 2.5vw, 20px)' }}>
+                    <p style={{ fontSize: 'clamp(18px, 4vw, 28px)', fontWeight: 700, color: 'var(--c-text)', lineHeight: 1.1 }}>{formatCurrency(active.length * 199)}</p>
                     <p style={{ fontSize: 12, color: '#71717A', marginTop: 4 }}>Monthly Revenue</p>
                 </div>
             </div>
 
             <div className="page-section">
                 <div className="section-header"><h2 className="heading-2">All Subscribers</h2></div>
-                <div style={{ backgroundColor: '#111113', border: '1px solid #27272A', borderRadius: 14, overflow: 'hidden' }}>
+                <div style={{ backgroundColor: 'var(--c-surface)', border: '1px solid var(--c-border)', borderRadius: 14, overflow: 'hidden' }}>
                     <table style={{ width: '100%', fontSize: 14, borderCollapse: 'collapse' }}>
                         <thead>
-                            <tr style={{ borderBottom: '1px solid #27272A' }}>
+                            <tr style={{ borderBottom: '1px solid var(--c-border)' }}>
                                 {['Member', 'Plan', 'Status', 'Start Date', 'Amount'].map(h => (
                                     <th key={h} style={{ textAlign: 'left', fontSize: 11, color: '#71717A', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', padding: '12px 16px' }}>{h}</th>
                                 ))}
@@ -76,22 +76,22 @@ export default function AdminSubscriptionsPage() {
                             {clients.map(c => {
                                 const config = STATUS_CONFIG[c.subscription?.status] || STATUS_CONFIG.none
                                 return (
-                                    <tr key={c.id} style={{ borderBottom: '1px solid #1F1F23' }}>
+                                    <tr key={c.id} style={{ borderBottom: '1px solid var(--c-divider)' }}>
                                         <td style={{ padding: '14px 16px' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                                                <div style={{ width: 32, height: 32, borderRadius: '50%', backgroundColor: '#1A1A1F', border: '1px solid #27272A', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 600, color: '#A1A1AA' }}>
+                                                <div style={{ width: 32, height: 32, borderRadius: '50%', backgroundColor: 'var(--c-surface-2)', border: '1px solid var(--c-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 600, color: 'var(--c-text-2)' }}>
                                                     {c.fullName.split(' ').map(n => n[0]).join('')}
                                                 </div>
                                                 <div>
-                                                    <p style={{ fontWeight: 500, color: '#F5F5F4' }}>{c.fullName}</p>
+                                                    <p style={{ fontWeight: 500, color: 'var(--c-text)' }}>{c.fullName}</p>
                                                     <p style={{ fontSize: 12, color: '#71717A' }}>{c.email}</p>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td style={{ padding: '14px 16px', color: '#A1A1AA' }}>Butler Premium</td>
+                                        <td style={{ padding: '14px 16px', color: 'var(--c-text-2)' }}>Butler Premium</td>
                                         <td style={{ padding: '14px 16px' }}><Badge variant={config.badge} size="sm">{config.label}</Badge></td>
                                         <td style={{ padding: '14px 16px', color: '#71717A', fontSize: 13 }}>{c.subscription?.startDate ? formatDate(c.subscription.startDate) : '—'}</td>
-                                        <td style={{ padding: '14px 16px', fontWeight: 500, color: '#F5F5F4' }}>{c.subscription?.plan || '$199/month'}</td>
+                                        <td style={{ padding: '14px 16px', fontWeight: 500, color: 'var(--c-text)' }}>{c.subscription?.plan || '$199/month'}</td>
                                     </tr>
                                 )
                             })}

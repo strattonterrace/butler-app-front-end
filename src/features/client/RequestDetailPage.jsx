@@ -14,11 +14,11 @@ const STATUS_LABEL = { submitted: 'Submitted', reviewed: 'Reviewed', assigned: '
 
 function InfoRow({ icon: Icon, label, value }) {
     return (
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '12px 0', borderBottom: '1px solid #1F1F23' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '12px 0', borderBottom: '1px solid var(--c-divider)' }}>
             <Icon size={16} style={{ color: '#71717A', marginTop: 2, flexShrink: 0 }} />
             <div>
                 <p style={{ fontSize: 12, color: '#71717A', marginBottom: 2 }}>{label}</p>
-                <p style={{ fontSize: 14, color: '#F5F5F4' }}>{value}</p>
+                <p style={{ fontSize: 14, color: 'var(--c-text)' }}>{value}</p>
             </div>
         </div>
     )
@@ -30,10 +30,10 @@ function TimelineItem({ entry, isLast }) {
         <div style={{ display: 'flex', gap: 12 }}>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                 <CheckCircle size={18} weight="fill" style={{ color: '#22C55E', flexShrink: 0 }} />
-                {!isLast && <div style={{ width: 2, flex: 1, backgroundColor: '#27272A', marginTop: 4 }} />}
+                {!isLast && <div style={{ width: 2, flex: 1, backgroundColor: 'var(--c-border)', marginTop: 4 }} />}
             </div>
             <div style={{ paddingBottom: isLast ? 0 : 16 }}>
-                <p style={{ fontSize: 14, fontWeight: 500, color: '#F5F5F4', textTransform: 'capitalize' }}>{entry.toStatus.replace('_', ' ')}</p>
+                <p style={{ fontSize: 14, fontWeight: 500, color: 'var(--c-text)', textTransform: 'capitalize' }}>{entry.toStatus.replace('_', ' ')}</p>
                 <p style={{ fontSize: 12, color: '#71717A' }}>{actor} · {formatDate(entry.createdAt, { format: 'relative' })}</p>
             </div>
         </div>
@@ -86,7 +86,7 @@ export default function RequestDetailPage() {
     if (!request) {
         return (
             <div style={{ maxWidth: 640, margin: '0 auto', textAlign: 'center', padding: '64px 0' }}>
-                <h2 style={{ fontSize: 20, fontWeight: 600, color: '#F5F5F4', marginBottom: 8 }}>Request not found</h2>
+                <h2 style={{ fontSize: 20, fontWeight: 600, color: 'var(--c-text)', marginBottom: 8 }}>Request not found</h2>
                 <p className="muted-text" style={{ marginBottom: 16 }}>This request doesn&apos;t exist or has been removed.</p>
                 <Button variant="secondary" onClick={() => navigate('/requests')}>Back to Requests</Button>
             </div>
@@ -108,14 +108,14 @@ export default function RequestDetailPage() {
             <div className="page-section">
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                        <div style={{ width: 48, height: 48, borderRadius: 12, backgroundColor: '#1A1A1F', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#A1A1AA' }}>
+                        <div style={{ width: 48, height: 48, borderRadius: 12, backgroundColor: 'var(--c-surface-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--c-text-2)' }}>
                             <ServiceIcon size={24} weight="regular" />
                         </div>
                         <div>
-                            <h1 style={{ fontSize: 22, fontWeight: 600, color: '#F5F5F4', marginBottom: 4 }}>{request.title}</h1>
+                            <h1 style={{ fontSize: 22, fontWeight: 600, color: 'var(--c-text)', marginBottom: 4 }}>{request.title}</h1>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                                 <span style={{ fontSize: 13, color: '#71717A' }}>{SERVICE_TYPES[request.serviceType]?.label}</span>
-                                <span style={{ color: '#27272A' }}>·</span>
+                                <span style={{ color: 'var(--c-border)' }}>·</span>
                                 <Badge variant={STATUS_BADGE[request.status]} size="sm">{STATUS_LABEL[request.status]}</Badge>
                             </div>
                         </div>
@@ -133,7 +133,7 @@ export default function RequestDetailPage() {
                 <div>
                     <Card style={{ marginBottom: 16 }}>
                         <h3 className="heading-2" style={{ marginBottom: 12 }}>Details</h3>
-                        <p style={{ fontSize: 14, color: '#A1A1AA', lineHeight: 1.7, marginBottom: 16 }}>{request.description}</p>
+                        <p style={{ fontSize: 14, color: 'var(--c-text-2)', lineHeight: 1.7, marginBottom: 16 }}>{request.description}</p>
                         <InfoRow icon={MapPin} label="Pickup" value={request.pickupLocation} />
                         <InfoRow icon={MapPin} label="Drop-off" value={request.dropoffLocation} />
                         <InfoRow icon={Clock} label="Urgency" value={request.urgency === 'scheduled' ? `Scheduled — ${request.scheduledDate} (${request.scheduledWindow})` : request.urgency.toUpperCase()} />
@@ -144,14 +144,14 @@ export default function RequestDetailPage() {
                     {request.specialInstructions && (
                         <Card style={{ marginBottom: 16 }}>
                             <h3 className="heading-2" style={{ marginBottom: 8 }}>Special Instructions</h3>
-                            <p style={{ fontSize: 14, color: '#A1A1AA', lineHeight: 1.7 }}>{request.specialInstructions}</p>
+                            <p style={{ fontSize: 14, color: 'var(--c-text-2)', lineHeight: 1.7 }}>{request.specialInstructions}</p>
                         </Card>
                     )}
 
                     {request.completionNotes && (
                         <Card>
                             <h3 className="heading-2" style={{ marginBottom: 8 }}>Completion Notes</h3>
-                            <p style={{ fontSize: 14, color: '#A1A1AA', lineHeight: 1.7 }}>{request.completionNotes}</p>
+                            <p style={{ fontSize: 14, color: 'var(--c-text-2)', lineHeight: 1.7 }}>{request.completionNotes}</p>
                         </Card>
                     )}
 
@@ -170,24 +170,24 @@ export default function RequestDetailPage() {
                         <Card style={{ marginBottom: 16 }}>
                             <h3 className="heading-2" style={{ marginBottom: 12 }}>Your Driver</h3>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-                                <div style={{ width: 40, height: 40, borderRadius: '50%', backgroundColor: '#1A1A1F', border: '1px solid #27272A', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 600, color: '#A1A1AA' }}>
+                                <div style={{ width: 40, height: 40, borderRadius: '50%', backgroundColor: 'var(--c-surface-2)', border: '1px solid var(--c-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 600, color: 'var(--c-text-2)' }}>
                                     {driver.fullName.split(' ').map(n => n[0]).join('')}
                                 </div>
                                 <div>
-                                    <p style={{ fontSize: 14, fontWeight: 500, color: '#F5F5F4' }}>{driver.fullName}</p>
+                                    <p style={{ fontSize: 14, fontWeight: 500, color: 'var(--c-text)' }}>{driver.fullName}</p>
                                     <span style={{ fontSize: 12, color: '#71717A' }}>Driver</span>
                                 </div>
                             </div>
                             {driver.vehicle && (
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#A1A1AA', padding: '8px 0', borderTop: '1px solid #1F1F23' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--c-text-2)', padding: '8px 0', borderTop: '1px solid var(--c-divider)' }}>
                                     <Car size={16} style={{ color: '#71717A' }} />
                                     <span>{driver.vehicle}</span>
                                 </div>
                             )}
                             {driver.phone && !['completed', 'cancelled'].includes(request.status) && (
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12, paddingTop: 12, borderTop: '1px solid #1F1F23' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--c-divider)' }}>
                                     <a href={`tel:${driver.phone}`}
-                                        style={{ flex: 1, height: 34, borderRadius: 8, border: '1px solid #27272A', backgroundColor: '#1A1A1F', color: '#A1A1AA', fontSize: 12, fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, textDecoration: 'none' }}>
+                                        style={{ flex: 1, height: 34, borderRadius: 8, border: '1px solid var(--c-border)', backgroundColor: 'var(--c-surface-2)', color: 'var(--c-text-2)', fontSize: 12, fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, textDecoration: 'none' }}>
                                         <Phone size={14} /> Call {driver.phone}
                                     </a>
                                 </div>

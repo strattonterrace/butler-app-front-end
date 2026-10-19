@@ -21,12 +21,12 @@ function StatsCard({ label, value, subtext, mobile }) {
     const isLight = theme === 'light'
     return (
         <div style={{
-            backgroundColor: isLight ? '#FFFFFF' : '#111113',
-            border: `1px solid ${isLight ? '#E4E4E7' : '#27272A'}`,
+            backgroundColor: isLight ? '#FFFFFF' : 'var(--c-surface)',
+            border: `1px solid ${isLight ? '#E4E4E7' : 'var(--c-border)'}`,
             borderRadius: mobile ? 12 : 14, padding: mobile ? '12px 14px' : '16px 20px'
         }}>
             <p style={{ fontSize: mobile ? 11 : 13, color: '#71717A', marginBottom: mobile ? 2 : 4 }}>{label}</p>
-            <p style={{ fontSize: mobile ? 20 : 28, fontWeight: 700, color: isLight ? '#1C1917' : '#F5F5F4', lineHeight: 1.1 }}>{value}</p>
+            <p style={{ fontSize: mobile ? 20 : 28, fontWeight: 700, color: isLight ? '#1C1917' : 'var(--c-text)', lineHeight: 1.1 }}>{value}</p>
             {subtext && <p style={{ fontSize: mobile ? 10 : 12, color: '#71717A', marginTop: mobile ? 2 : 4 }}>{subtext}</p>}
         </div>
     )
@@ -43,14 +43,14 @@ function RequestCard({ request }) {
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                         <div style={{
                             width: 40, height: 40, borderRadius: 10,
-                            backgroundColor: isLight ? '#F4F4F5' : '#1A1A1F',
+                            backgroundColor: isLight ? '#F4F4F5' : 'var(--c-surface-2)',
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            color: isLight ? '#44403C' : '#A1A1AA',
+                            color: isLight ? '#44403C' : 'var(--c-text-2)',
                         }}>
                             <ServiceIcon size={20} weight="regular" />
                         </div>
                         <div>
-                            <p style={{ fontSize: 14, fontWeight: 600, color: isLight ? '#1C1917' : '#F5F5F4' }}>{request.title}</p>
+                            <p style={{ fontSize: 14, fontWeight: 600, color: isLight ? '#1C1917' : 'var(--c-text)' }}>{request.title}</p>
                             <p style={{ fontSize: 12, color: '#71717A' }}>{SERVICE_TYPES[request.serviceType]?.label}</p>
                         </div>
                     </div>
@@ -61,11 +61,11 @@ function RequestCard({ request }) {
                     <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><CalendarBlank size={13} />{formatDate(request.createdAt, { format: 'relative' })}</span>
                 </div>
                 {request.driverName && !['completed', 'cancelled'].includes(request.status) && (
-                    <div style={{ marginTop: 12, paddingTop: 12, borderTop: `1px solid ${isLight ? '#F0F0F0' : '#1F1F23'}`, display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <div style={{ width: 24, height: 24, borderRadius: '50%', backgroundColor: isLight ? '#F4F4F5' : '#1A1A1F', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 600, color: isLight ? '#44403C' : '#A1A1AA' }}>
+                    <div style={{ marginTop: 12, paddingTop: 12, borderTop: `1px solid ${isLight ? '#F0F0F0' : 'var(--c-divider)'}`, display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <div style={{ width: 24, height: 24, borderRadius: '50%', backgroundColor: isLight ? '#F4F4F5' : 'var(--c-surface-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 600, color: isLight ? '#44403C' : 'var(--c-text-2)' }}>
                             {request.driverName.split(' ').map(n => n[0]).join('')}
                         </div>
-                        <span style={{ fontSize: 12, color: isLight ? '#44403C' : '#A1A1AA' }}>{request.driverName}</span>
+                        <span style={{ fontSize: 12, color: isLight ? '#44403C' : 'var(--c-text-2)' }}>{request.driverName}</span>
                     </div>
                 )}
             </Card>
@@ -76,8 +76,8 @@ function RequestCard({ request }) {
 const myDashSkeleton = (
     <div style={{ maxWidth: 900, margin: '0 auto' }}>
         <div className="page-section">
-            <div style={{ height: 28, width: '60%', backgroundColor: '#1A1A1F', borderRadius: 8, marginBottom: 8, animation: 'skeleton-pulse 1.5s ease-in-out infinite' }} />
-            <div style={{ height: 16, width: '35%', backgroundColor: '#1A1A1F', borderRadius: 6, animation: 'skeleton-pulse 1.5s ease-in-out infinite' }} />
+            <div style={{ height: 28, width: '60%', backgroundColor: 'var(--c-surface-2)', borderRadius: 8, marginBottom: 8, animation: 'skeleton-pulse 1.5s ease-in-out infinite' }} />
+            <div style={{ height: 16, width: '35%', backgroundColor: 'var(--c-surface-2)', borderRadius: 6, animation: 'skeleton-pulse 1.5s ease-in-out infinite' }} />
         </div>
         <div className="page-section grid-stats">
             {[1, 2, 3, 4].map(i => <SkeletonCard key={i} lines={1} style={{ minHeight: 80 }} />)}
@@ -163,7 +163,7 @@ export default function ClientDashboard() {
                                     <div>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                                             <Plus size={20} weight="bold" style={{ color: '#C9A84C' }} />
-                                            <h3 style={{ fontSize: 18, fontWeight: 600, color: '#F5F5F4' }}>New Request</h3>
+                                            <h3 style={{ fontSize: 18, fontWeight: 600, color: 'var(--c-text)' }}>New Request</h3>
                                         </div>
                                         <p style={{ fontSize: 14, color: '#71717A' }}>What can we do for you today?</p>
                                     </div>
@@ -207,10 +207,10 @@ export default function ClientDashboard() {
                 {myRequests.length === 0 && (
                     <FadeIn delay={0.15}>
                         <div className="page-section" style={{ textAlign: 'center', padding: '64px 0' }}>
-                            <div style={{ width: 64, height: 64, borderRadius: 16, backgroundColor: '#1A1A1F', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+                            <div style={{ width: 64, height: 64, borderRadius: 16, backgroundColor: 'var(--c-surface-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
                                 <Basket size={32} style={{ color: '#71717A' }} />
                             </div>
-                            <h3 style={{ fontSize: 18, fontWeight: 600, color: '#F5F5F4', marginBottom: 4 }}>No requests yet</h3>
+                            <h3 style={{ fontSize: 18, fontWeight: 600, color: 'var(--c-text)', marginBottom: 4 }}>No requests yet</h3>
                             <p style={{ fontSize: 14, color: '#71717A', marginBottom: 16 }}>Submit your first errand request and we&apos;ll handle the rest.</p>
                             <Link to="/requests/new"><Button>Submit a Request</Button></Link>
                         </div>

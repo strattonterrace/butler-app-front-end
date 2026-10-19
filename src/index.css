@@ -81,6 +81,20 @@ html {
   color-scheme: dark;
 }
 
+/* ── Theme tokens for inline styles (light-mode theming pass) ──
+   Components reference these via var(--c-*). Dark values live here;
+   html.light overrides them below. Accent colors (gold / green / red /
+   amber) are intentionally NOT tokenized — they stay fixed in both themes. */
+:root {
+  --c-surface:   #111113;
+  --c-surface-2: #1A1A1F;
+  --c-input:     #1E1E24;
+  --c-border:    #27272A;
+  --c-divider:   #1F1F23;
+  --c-text:      #F5F5F4;
+  --c-text-2:    #A1A1AA;
+}
+
 /* ── Light Mode (Ryan's Option B — Apple-style) ── */
 html.light {
   background-color: #FAFAF9 !important;
@@ -106,6 +120,15 @@ html.light {
   /* Gold stays the same — it works on both themes */
   --color-gold: #B8860B;
   --color-gold-light: #C9A84C;
+
+  /* Inline-style theme tokens — light values */
+  --c-surface:   #FFFFFF;
+  --c-surface-2: #F4F4F5;
+  --c-input:     #F4F4F5;
+  --c-border:    #E4E4E7;
+  --c-divider:   #F0F0F0;
+  --c-text:      #1C1917;
+  --c-text-2:    #52525B;
 }
 
 html.light body {

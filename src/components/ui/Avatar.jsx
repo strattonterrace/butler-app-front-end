@@ -11,7 +11,7 @@ function Avatar({ name, src, size = 'md', style, ...props }) {
     if (src) {
         return (
             <img src={src} alt={name || 'Avatar'}
-                style={{ width: dim, height: dim, borderRadius: '50%', objectFit: 'cover', backgroundColor: '#1A1A1F', ...style }}
+                style={{ width: dim, height: dim, borderRadius: '50%', objectFit: 'cover', backgroundColor: 'var(--c-surface-2)', ...style }}
                 {...props}
             />
         )
@@ -20,9 +20,9 @@ function Avatar({ name, src, size = 'md', style, ...props }) {
     return (
         <div
             style={{
-                width: dim, height: dim, borderRadius: '50%', backgroundColor: '#1A1A1F',
-                border: '1px solid #27272A', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: font, fontWeight: 600, color: '#A1A1AA', flexShrink: 0, ...style,
+                width: dim, height: dim, borderRadius: '50%', backgroundColor: 'var(--c-surface-2)',
+                border: '1px solid var(--c-border)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: font, fontWeight: 600, color: 'var(--c-text-2)', flexShrink: 0, ...style,
             }}
             title={name} {...props}
         >

@@ -83,11 +83,11 @@ export default function AdminDriversPage() {
                             <Card key={driver.id}>
                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                                        <div style={{ width: 44, height: 44, borderRadius: '50%', backgroundColor: '#1A1A1F', border: '1px solid #27272A', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, fontWeight: 600, color: '#A1A1AA' }}>
+                                        <div style={{ width: 44, height: 44, borderRadius: '50%', backgroundColor: 'var(--c-surface-2)', border: '1px solid var(--c-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, fontWeight: 600, color: 'var(--c-text-2)' }}>
                                             {driver.name.split(' ').map(n => n[0]).join('')}
                                         </div>
                                         <div>
-                                            <p style={{ fontSize: 15, fontWeight: 500, color: '#F5F5F4' }}>{driver.name}</p>
+                                            <p style={{ fontSize: 15, fontWeight: 500, color: 'var(--c-text)' }}>{driver.name}</p>
                                             <p style={{ fontSize: 13, color: '#71717A' }}>{driver.email} · {driver.phone}</p>
                                         </div>
                                     </div>
@@ -95,13 +95,13 @@ export default function AdminDriversPage() {
                                 </div>
 
                                 {driver.vehicle && (
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '12px 0', padding: '10px 12px', backgroundColor: '#1A1A1F', borderRadius: 10, fontSize: 13, color: '#A1A1AA' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '12px 0', padding: '10px 12px', backgroundColor: 'var(--c-surface-2)', borderRadius: 10, fontSize: 13, color: 'var(--c-text-2)' }}>
                                         <Car size={16} style={{ color: '#71717A' }} />
                                         <span>{driver.vehicle}{driver.licensePlate ? ` · ${driver.licensePlate}` : ''}</span>
                                     </div>
                                 )}
 
-                                <div style={{ display: 'flex', gap: 8, paddingTop: 12, borderTop: '1px solid #1F1F23' }}>
+                                <div style={{ display: 'flex', gap: 8, paddingTop: 12, borderTop: '1px solid var(--c-divider)' }}>
                                     <Button size="sm" disabled={actingId === driver.id} onClick={() => approve(driver)} style={{ backgroundColor: 'rgba(34,197,94,0.1)', color: '#22C55E', border: '1px solid rgba(34,197,94,0.2)' }}>
                                         <CheckCircle size={14} weight="bold" /> {actingId === driver.id ? 'Working…' : 'Approve'}
                                     </Button>
@@ -118,10 +118,10 @@ export default function AdminDriversPage() {
                 <div className="section-header">
                     <h2 className="heading-2">Approved Drivers ({approved.length})</h2>
                 </div>
-                <div style={{ backgroundColor: '#111113', border: '1px solid #27272A', borderRadius: 14, overflow: 'hidden' }}>
+                <div style={{ backgroundColor: 'var(--c-surface)', border: '1px solid var(--c-border)', borderRadius: 14, overflow: 'hidden' }}>
                     <table style={{ width: '100%', fontSize: 14, borderCollapse: 'collapse' }}>
                         <thead>
-                            <tr style={{ borderBottom: '1px solid #27272A' }}>
+                            <tr style={{ borderBottom: '1px solid var(--c-border)' }}>
                                 {['Driver', 'Vehicle', 'Phone', 'Active Tasks', 'Status'].map(h => (
                                     <th key={h} style={{ textAlign: 'left', fontSize: 11, color: '#71717A', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', padding: '12px 16px' }}>{h}</th>
                                 ))}
@@ -129,18 +129,18 @@ export default function AdminDriversPage() {
                         </thead>
                         <tbody>
                             {approved.map(d => (
-                                <tr key={d.id} style={{ borderBottom: '1px solid #1F1F23' }}>
+                                <tr key={d.id} style={{ borderBottom: '1px solid var(--c-divider)' }}>
                                     <td style={{ padding: '14px 16px' }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                                            <div style={{ width: 32, height: 32, borderRadius: '50%', backgroundColor: '#1A1A1F', border: '1px solid #27272A', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 600, color: '#A1A1AA' }}>
+                                            <div style={{ width: 32, height: 32, borderRadius: '50%', backgroundColor: 'var(--c-surface-2)', border: '1px solid var(--c-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 600, color: 'var(--c-text-2)' }}>
                                                 {d.name.split(' ').map(n => n[0]).join('')}
                                             </div>
-                                            <p style={{ fontWeight: 500, color: '#F5F5F4' }}>{d.name}</p>
+                                            <p style={{ fontWeight: 500, color: 'var(--c-text)' }}>{d.name}</p>
                                         </div>
                                     </td>
-                                    <td style={{ padding: '14px 16px', color: '#A1A1AA', fontSize: 13 }}>{d.vehicle || '—'}</td>
-                                    <td style={{ padding: '14px 16px', color: '#A1A1AA', fontSize: 13 }}>{d.phone}</td>
-                                    <td style={{ padding: '14px 16px', color: '#A1A1AA', fontSize: 13 }}>{typeof d.currentTaskCount === 'number' ? d.currentTaskCount : '—'}</td>
+                                    <td style={{ padding: '14px 16px', color: 'var(--c-text-2)', fontSize: 13 }}>{d.vehicle || '—'}</td>
+                                    <td style={{ padding: '14px 16px', color: 'var(--c-text-2)', fontSize: 13 }}>{d.phone}</td>
+                                    <td style={{ padding: '14px 16px', color: 'var(--c-text-2)', fontSize: 13 }}>{typeof d.currentTaskCount === 'number' ? d.currentTaskCount : '—'}</td>
                                     <td style={{ padding: '14px 16px' }}><Badge variant="success" size="sm">Approved</Badge></td>
                                 </tr>
                             ))}

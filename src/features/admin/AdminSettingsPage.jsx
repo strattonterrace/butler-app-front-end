@@ -21,7 +21,7 @@ export default function AdminSettingsPage() {
                 <p className="muted-text" style={{ marginTop: 4 }}>System configuration and preferences.</p>
             </div>
 
-            <div className="page-section" style={{ display: 'flex', gap: 4, borderBottom: '1px solid #27272A', paddingBottom: 0 }}>
+            <div className="page-section" style={{ display: 'flex', gap: 4, borderBottom: '1px solid var(--c-border)', paddingBottom: 0 }}>
                 {TABS.map(tab => (
                     <button key={tab.key} onClick={() => setActiveTab(tab.key)}
                         style={{
@@ -69,17 +69,17 @@ export default function AdminSettingsPage() {
                                 { name: 'Retail Return', enabled: true },
                                 { name: 'Food Pickup', enabled: true },
                             ].map((svc, i) => (
-                                <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 0', borderBottom: i < 5 ? '1px solid #1F1F23' : 'none' }}>
-                                    <span style={{ fontSize: 14, color: '#F5F5F4' }}>{svc.name}</span>
+                                <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 0', borderBottom: i < 5 ? '1px solid var(--c-divider)' : 'none' }}>
+                                    <span style={{ fontSize: 14, color: 'var(--c-text)' }}>{svc.name}</span>
                                     <label style={{ position: 'relative', width: 44, height: 24, cursor: 'pointer' }}>
                                         <input type="checkbox" defaultChecked={svc.enabled} style={{ display: 'none' }}
                                             onChange={(e) => {
                                                 const track = e.target.nextSibling; const dot = track.querySelector('span')
                                                 if (e.target.checked) { track.style.backgroundColor = '#C9A84C'; dot.style.transform = 'translateX(20px)' }
-                                                else { track.style.backgroundColor = '#27272A'; dot.style.transform = 'translateX(0)' }
+                                                else { track.style.backgroundColor = 'var(--c-border)'; dot.style.transform = 'translateX(0)' }
                                             }}
                                         />
-                                        <div style={{ width: 44, height: 24, borderRadius: 12, backgroundColor: svc.enabled ? '#C9A84C' : '#27272A', padding: 2, transition: 'background-color 200ms' }}>
+                                        <div style={{ width: 44, height: 24, borderRadius: 12, backgroundColor: svc.enabled ? '#C9A84C' : 'var(--c-border)', padding: 2, transition: 'background-color 200ms' }}>
                                             <span style={{ display: 'block', width: 20, height: 20, borderRadius: '50%', backgroundColor: '#fff', transition: 'transform 200ms', transform: svc.enabled ? 'translateX(20px)' : 'translateX(0)' }} />
                                         </div>
                                     </label>
@@ -117,9 +117,9 @@ export default function AdminSettingsPage() {
                         { label: 'Request cancellations', desc: 'When clients cancel their requests', default: false },
                         { label: 'Daily summary', desc: 'Receive a daily email summary of all activity', default: true },
                     ].map((pref, i) => (
-                        <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 0', borderBottom: i < 4 ? '1px solid #1F1F23' : 'none' }}>
+                        <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 0', borderBottom: i < 4 ? '1px solid var(--c-divider)' : 'none' }}>
                             <div>
-                                <p style={{ fontSize: 14, fontWeight: 500, color: '#F5F5F4' }}>{pref.label}</p>
+                                <p style={{ fontSize: 14, fontWeight: 500, color: 'var(--c-text)' }}>{pref.label}</p>
                                 <p style={{ fontSize: 13, color: '#71717A' }}>{pref.desc}</p>
                             </div>
                             <label style={{ position: 'relative', width: 44, height: 24, cursor: 'pointer' }}>
@@ -127,10 +127,10 @@ export default function AdminSettingsPage() {
                                     onChange={(e) => {
                                         const track = e.target.nextSibling; const dot = track.querySelector('span')
                                         if (e.target.checked) { track.style.backgroundColor = '#C9A84C'; dot.style.transform = 'translateX(20px)' }
-                                        else { track.style.backgroundColor = '#27272A'; dot.style.transform = 'translateX(0)' }
+                                        else { track.style.backgroundColor = 'var(--c-border)'; dot.style.transform = 'translateX(0)' }
                                     }}
                                 />
-                                <div style={{ width: 44, height: 24, borderRadius: 12, backgroundColor: pref.default ? '#C9A84C' : '#27272A', padding: 2, transition: 'background-color 200ms' }}>
+                                <div style={{ width: 44, height: 24, borderRadius: 12, backgroundColor: pref.default ? '#C9A84C' : 'var(--c-border)', padding: 2, transition: 'background-color 200ms' }}>
                                     <span style={{ display: 'block', width: 20, height: 20, borderRadius: '50%', backgroundColor: '#fff', transition: 'transform 200ms', transform: pref.default ? 'translateX(20px)' : 'translateX(0)' }} />
                                 </div>
                             </label>
@@ -140,7 +140,7 @@ export default function AdminSettingsPage() {
                 </Card>
             )}
 
-            <div style={{ marginTop: 32, paddingTop: 20, borderTop: '1px solid #27272A' }}>
+            <div style={{ marginTop: 32, paddingTop: 20, borderTop: '1px solid var(--c-border)' }}>
                 <button style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, fontWeight: 500, color: '#EF4444', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
                     <SignOut size={18} /> Sign out
                 </button>

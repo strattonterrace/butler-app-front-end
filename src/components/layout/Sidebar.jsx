@@ -46,7 +46,7 @@ export function Sidebar() {
     return (
         <aside className={cn('app-sidebar', sidebarCollapsed ? 'app-sidebar--collapsed' : 'app-sidebar--expanded')}>
             {/* Logo */}
-            <div style={{ display: 'flex', alignItems: 'center', height: 64, borderBottom: '1px solid #27272A', padding: sidebarCollapsed ? '0' : '0 24px', justifyContent: sidebarCollapsed ? 'center' : 'flex-start' }}>
+            <div style={{ display: 'flex', alignItems: 'center', height: 64, borderBottom: '1px solid var(--c-border)', padding: sidebarCollapsed ? '0' : '0 24px', justifyContent: sidebarCollapsed ? 'center' : 'flex-start' }}>
                 <img src="/images/butlerlogo.png" alt="Butler" style={{ height: sidebarCollapsed ? 32 : 40, objectFit: 'contain' }} />
             </div>
 
@@ -64,7 +64,7 @@ export function Sidebar() {
                             textDecoration: 'none', transition: 'all 150ms',
                             justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
                             backgroundColor: isActive ? 'rgba(201,168,76,0.1)' : 'transparent',
-                            color: isActive ? '#C9A84C' : '#A1A1AA',
+                            color: isActive ? '#C9A84C' : 'var(--c-text-2)',
                         })}
                     >
                         <item.icon size={20} weight="regular" style={{ flexShrink: 0 }} />
@@ -73,9 +73,8 @@ export function Sidebar() {
                 ))}
             </nav>
 
-            {/* Theme Toggle — hidden until M3 light-mode theming pass */}
-            {false && (
-            <div style={{ borderTop: '1px solid #27272A', padding: 12 }}>
+            {/* Theme Toggle */}
+            <div style={{ borderTop: '1px solid var(--c-border)', padding: 12 }}>
                 <button
                     onClick={toggleTheme}
                     title={isLight ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
@@ -87,7 +86,7 @@ export function Sidebar() {
                         justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
                         transition: 'all 150ms',
                     }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = isLight ? '#E8E8E8' : '#1A1A1F'}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = isLight ? '#E8E8E8' : 'var(--c-surface-2)'}
                     onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                 >
                     {isLight
@@ -98,10 +97,9 @@ export function Sidebar() {
                     )}
                 </button>
             </div>
-            )}
 
             {/* Collapse */}
-            <div style={{ borderTop: '1px solid #27272A', padding: 12 }}>
+            <div style={{ borderTop: '1px solid var(--c-border)', padding: 12 }}>
                 <button onClick={toggleSidebar}
                     style={{
                         display: 'flex', alignItems: 'center', gap: 8, width: '100%',
@@ -117,17 +115,17 @@ export function Sidebar() {
             </div>
 
             {/* User */}
-            <div style={{ borderTop: '1px solid #27272A', padding: 16, display: 'flex', alignItems: 'center', gap: 12, justifyContent: sidebarCollapsed ? 'center' : 'flex-start' }}>
+            <div style={{ borderTop: '1px solid var(--c-border)', padding: 16, display: 'flex', alignItems: 'center', gap: 12, justifyContent: sidebarCollapsed ? 'center' : 'flex-start' }}>
                 <div style={{
-                    width: 36, height: 36, borderRadius: '50%', backgroundColor: '#1A1A1F',
-                    border: '1px solid #27272A', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 13, fontWeight: 600, color: '#A1A1AA', flexShrink: 0,
+                    width: 36, height: 36, borderRadius: '50%', backgroundColor: 'var(--c-surface-2)',
+                    border: '1px solid var(--c-border)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 13, fontWeight: 600, color: 'var(--c-text-2)', flexShrink: 0,
                 }}>
                     {currentUser?.fullName?.split(' ').map(n => n[0]).join('') || 'U'}
                 </div>
                 {!sidebarCollapsed && (
                     <div style={{ flex: 1, minWidth: 0 }}>
-                        <p style={{ fontSize: 14, fontWeight: 500, color: '#F5F5F4', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{currentUser?.fullName}</p>
+                        <p style={{ fontSize: 14, fontWeight: 500, color: 'var(--c-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{currentUser?.fullName}</p>
                         <p style={{ fontSize: 12, color: '#71717A', textTransform: 'capitalize' }}>{role}</p>
                     </div>
                 )}

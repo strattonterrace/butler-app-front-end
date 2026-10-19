@@ -40,21 +40,21 @@ function UserDetailModal({ user, onClose, onUpdated }) {
             <div onClick={onClose} style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 40 }} />
             <div style={{
                 position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', zIndex: 50,
-                width: '100%', maxWidth: 480, backgroundColor: '#111113', border: '1px solid #27272A',
+                width: '100%', maxWidth: 480, backgroundColor: 'var(--c-surface)', border: '1px solid var(--c-border)',
                 borderRadius: 16, padding: 0, boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
             }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid #27272A' }}>
-                    <h3 style={{ fontSize: 16, fontWeight: 600, color: '#F5F5F4' }}>User Details</h3>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid var(--c-border)' }}>
+                    <h3 style={{ fontSize: 16, fontWeight: 600, color: 'var(--c-text)' }}>User Details</h3>
                     <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#71717A', padding: 4 }}><X size={18} /></button>
                 </div>
 
                 <div style={{ padding: 20 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 20 }}>
-                        <div style={{ width: 52, height: 52, borderRadius: '50%', backgroundColor: '#1A1A1F', border: '2px solid #27272A', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, fontWeight: 600, color: '#A1A1AA' }}>
+                        <div style={{ width: 52, height: 52, borderRadius: '50%', backgroundColor: 'var(--c-surface-2)', border: '2px solid var(--c-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, fontWeight: 600, color: 'var(--c-text-2)' }}>
                             {user.fullName?.split(' ').map(n => n[0]).join('') || '?'}
                         </div>
                         <div>
-                            <p style={{ fontSize: 16, fontWeight: 600, color: '#F5F5F4' }}>{user.fullName}</p>
+                            <p style={{ fontSize: 16, fontWeight: 600, color: 'var(--c-text)' }}>{user.fullName}</p>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }}>
                                 <Badge variant={ROLE_BADGE[user.role]} size="sm" style={{ textTransform: 'capitalize' }}>{user.role}</Badge>
                                 <span style={{ fontSize: 12, fontWeight: 500, color: user.status === 'active' ? '#22C55E' : '#71717A', textTransform: 'capitalize' }}>● {user.status}</span>
@@ -69,9 +69,9 @@ function UserDetailModal({ user, onClose, onUpdated }) {
                         ...(user.subscription?.status === 'active' ? [{ label: 'Subscription', value: `${user.subscription.plan || 'Active'} · active` }] : []),
                         ...(user.vehicle ? [{ label: 'Vehicle', value: `${user.vehicle.year} ${user.vehicle.make} ${user.vehicle.model} · ${user.vehicle.plate}` }] : []),
                     ].map((row, i, arr) => (
-                        <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: i < arr.length - 1 ? '1px solid #1F1F23' : 'none' }}>
+                        <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: i < arr.length - 1 ? '1px solid var(--c-divider)' : 'none' }}>
                             <span style={{ fontSize: 13, color: '#71717A' }}>{row.label}</span>
-                            <span style={{ fontSize: 13, color: '#F5F5F4', fontWeight: 500 }}>{row.value}</span>
+                            <span style={{ fontSize: 13, color: 'var(--c-text)', fontWeight: 500 }}>{row.value}</span>
                         </div>
                     ))}
                 </div>
@@ -118,10 +118,10 @@ function CreateOperatorForm({ onCreated, onCancel }) {
         }
     }
 
-    const inputStyle = { width: '100%', height: 36, borderRadius: 8, border: '1px solid #27272A', backgroundColor: '#1E1E24', color: '#F5F5F4', padding: '0 12px', fontSize: 13, fontFamily: 'inherit', outline: 'none' }
+    const inputStyle = { width: '100%', height: 36, borderRadius: 8, border: '1px solid var(--c-border)', backgroundColor: 'var(--c-input)', color: 'var(--c-text)', padding: '0 12px', fontSize: 13, fontFamily: 'inherit', outline: 'none' }
 
     return (
-        <div className="page-section" style={{ backgroundColor: '#111113', border: '1px solid #27272A', borderRadius: 14, padding: 20, display: 'flex', gap: 12, alignItems: 'flex-end', flexWrap: 'wrap' }}>
+        <div className="page-section" style={{ backgroundColor: 'var(--c-surface)', border: '1px solid var(--c-border)', borderRadius: 14, padding: 20, display: 'flex', gap: 12, alignItems: 'flex-end', flexWrap: 'wrap' }}>
             <div style={{ flex: 1, minWidth: 160 }}>
                 <label style={{ fontSize: 12, color: '#71717A', display: 'block', marginBottom: 4 }}>Full Name</label>
                 <input placeholder="Jane Smith" value={form.fullName} onChange={update('fullName')} style={inputStyle} />
@@ -135,7 +135,7 @@ function CreateOperatorForm({ onCreated, onCancel }) {
                 <input type="password" placeholder="Min 8 characters" value={form.password} onChange={update('password')} style={inputStyle} />
             </div>
             <Button size="sm" loading={loading} onClick={handleCreate}>Create</Button>
-            <button onClick={onCancel} style={{ padding: '6px 12px', borderRadius: 6, fontSize: 12, border: '1px solid #27272A', backgroundColor: 'transparent', color: '#71717A', cursor: 'pointer' }}>Cancel</button>
+            <button onClick={onCancel} style={{ padding: '6px 12px', borderRadius: 6, fontSize: 12, border: '1px solid var(--c-border)', backgroundColor: 'transparent', color: '#71717A', cursor: 'pointer' }}>Cancel</button>
         </div>
     )
 }
@@ -212,7 +212,7 @@ export default function AdminUsersPage() {
             )}
 
             <div className="page-section" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
-                <div style={{ display: 'flex', backgroundColor: '#111113', borderRadius: 10, border: '1px solid #27272A', overflow: 'hidden' }}>
+                <div style={{ display: 'flex', backgroundColor: 'var(--c-surface)', borderRadius: 10, border: '1px solid var(--c-border)', overflow: 'hidden' }}>
                     {TABS.map(tab => (
                         <button key={tab.key} onClick={() => setActiveTab(tab.key)}
                             style={{ padding: '8px 14px', fontSize: 13, fontWeight: 500, border: 'none', cursor: 'pointer', backgroundColor: activeTab === tab.key ? 'rgba(201,168,76,0.1)' : 'transparent', color: activeTab === tab.key ? '#C9A84C' : '#71717A', transition: 'all 150ms' }}
@@ -222,7 +222,7 @@ export default function AdminUsersPage() {
                 <div style={{ position: 'relative', width: 240 }}>
                     <MagnifyingGlass size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#71717A' }} />
                     <input placeholder="Search users..." value={search} onChange={(e) => setSearch(e.target.value)}
-                        style={{ width: '100%', height: 38, borderRadius: 10, border: '1px solid #27272A', backgroundColor: '#1E1E24', padding: '0 12px 0 36px', fontSize: 13, color: '#F5F5F4', outline: 'none', fontFamily: 'inherit' }} />
+                        style={{ width: '100%', height: 38, borderRadius: 10, border: '1px solid var(--c-border)', backgroundColor: 'var(--c-input)', padding: '0 12px 0 36px', fontSize: 13, color: 'var(--c-text)', outline: 'none', fontFamily: 'inherit' }} />
                 </div>
             </div>
 
@@ -235,10 +235,10 @@ export default function AdminUsersPage() {
                 </div>
             ) : (
                 <>
-                    <div style={{ backgroundColor: '#111113', border: '1px solid #27272A', borderRadius: 14, overflow: 'hidden' }}>
+                    <div style={{ backgroundColor: 'var(--c-surface)', border: '1px solid var(--c-border)', borderRadius: 14, overflow: 'hidden' }}>
                         <table style={{ width: '100%', fontSize: 14, borderCollapse: 'collapse' }}>
                             <thead>
-                                <tr style={{ borderBottom: '1px solid #27272A' }}>
+                                <tr style={{ borderBottom: '1px solid var(--c-border)' }}>
                                     {['User', 'Role', 'Status', 'Phone', 'Joined', ''].map(h => (
                                         <th key={h} style={{ textAlign: 'left', fontSize: 11, color: '#71717A', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', padding: '12px 16px' }}>{h}</th>
                                     ))}
@@ -246,18 +246,18 @@ export default function AdminUsersPage() {
                             </thead>
                             <tbody>
                                 {users.map(user => (
-                                    <tr key={user.id} style={{ borderBottom: '1px solid #1F1F23', cursor: 'pointer' }}
+                                    <tr key={user.id} style={{ borderBottom: '1px solid var(--c-divider)', cursor: 'pointer' }}
                                         onClick={() => setSelectedUser(user)}
                                         onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(26,26,31,0.5)'}
                                         onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                                     >
                                         <td style={{ padding: '14px 16px' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                                                <div style={{ width: 32, height: 32, borderRadius: '50%', backgroundColor: '#1A1A1F', border: '1px solid #27272A', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 600, color: '#A1A1AA' }}>
+                                                <div style={{ width: 32, height: 32, borderRadius: '50%', backgroundColor: 'var(--c-surface-2)', border: '1px solid var(--c-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 600, color: 'var(--c-text-2)' }}>
                                                     {user.fullName?.split(' ').map(n => n[0]).join('') || '?'}
                                                 </div>
                                                 <div>
-                                                    <p style={{ fontWeight: 500, color: '#F5F5F4' }}>{user.fullName}</p>
+                                                    <p style={{ fontWeight: 500, color: 'var(--c-text)' }}>{user.fullName}</p>
                                                     <p style={{ fontSize: 12, color: '#71717A' }}>{user.email}</p>
                                                 </div>
                                             </div>
@@ -270,7 +270,7 @@ export default function AdminUsersPage() {
                                                 {user.status}
                                             </span>
                                         </td>
-                                        <td style={{ padding: '14px 16px', color: '#A1A1AA', fontSize: 13 }}>{user.phone || '—'}</td>
+                                        <td style={{ padding: '14px 16px', color: 'var(--c-text-2)', fontSize: 13 }}>{user.phone || '—'}</td>
                                         <td style={{ padding: '14px 16px', color: '#71717A', fontSize: 13 }}>
                                             {user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}
                                         </td>

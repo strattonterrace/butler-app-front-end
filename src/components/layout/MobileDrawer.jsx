@@ -63,15 +63,15 @@ export function MobileDrawer() {
             <aside style={{
                 position: 'fixed', top: 0, left: 0, bottom: 0, zIndex: 50,
                 width: 280,
-                backgroundColor: isLight ? '#F4F4F5' : '#111113',
-                borderRight: `1px solid ${isLight ? '#D4D4D4' : '#27272A'}`,
+                backgroundColor: isLight ? '#F4F4F5' : 'var(--c-surface)',
+                borderRight: `1px solid ${isLight ? '#D4D4D4' : 'var(--c-border)'}`,
                 transform: mobileNavOpen ? 'translateX(0)' : 'translateX(-100%)',
                 transition: 'transform 300ms cubic-bezier(0.4, 0, 0.2, 1)',
                 display: 'flex', flexDirection: 'column',
                 boxShadow: mobileNavOpen ? '4px 0 20px rgba(0,0,0,0.4)' : 'none',
             }}>
                 {/* Header */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 64, padding: '0 20px', borderBottom: '1px solid #27272A' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 64, padding: '0 20px', borderBottom: '1px solid var(--c-border)' }}>
                     <img src="/images/butlerlogo.png" alt="Butler" style={{ height: 36, objectFit: 'contain' }} />
                     <button onClick={close} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#71717A', padding: 4 }}>
                         <X size={20} weight="bold" />
@@ -91,7 +91,7 @@ export function MobileDrawer() {
                                 padding: '12px 16px', borderRadius: 10, fontSize: 15, fontWeight: 500,
                                 textDecoration: 'none', transition: 'all 150ms',
                                 backgroundColor: isActive ? 'rgba(201,168,76,0.1)' : 'transparent',
-                                color: isActive ? '#C9A84C' : '#A1A1AA',
+                                color: isActive ? '#C9A84C' : 'var(--c-text-2)',
                             })}
                         >
                             <item.icon size={20} weight="regular" />
@@ -100,16 +100,15 @@ export function MobileDrawer() {
                     ))}
                 </nav>
 
-                {/* Theme Toggle — hidden until M3 light-mode theming pass */}
-                {false && (
-                <div style={{ borderTop: `1px solid ${isLight ? '#D4D4D4' : '#27272A'}`, padding: 12 }}>
+                {/* Theme Toggle */}
+                <div style={{ borderTop: `1px solid ${isLight ? '#D4D4D4' : 'var(--c-border)'}`, padding: 12 }}>
                     <button
                         onClick={() => { toggleTheme(); close() }}
                         style={{
                             display: 'flex', alignItems: 'center', gap: 10, width: '100%',
                             padding: '12px 16px', borderRadius: 10, fontSize: 15, fontWeight: 500,
                             border: 'none', cursor: 'pointer', backgroundColor: 'transparent',
-                            color: isLight ? '#78716C' : '#A1A1AA', textAlign: 'left',
+                            color: isLight ? '#78716C' : 'var(--c-text-2)', textAlign: 'left',
                             transition: 'all 150ms',
                         }}
                         onMouseEnter={(e) => e.currentTarget.style.backgroundColor = isLight ? '#E8E8E8' : 'rgba(201,168,76,0.05)'}
@@ -119,19 +118,18 @@ export function MobileDrawer() {
                         <span>{isLight ? 'Switch to Dark Mode' : 'Switch to Light Mode'}</span>
                     </button>
                 </div>
-                )}
 
                 {/* User info */}
-                <div style={{ borderTop: `1px solid ${isLight ? '#D4D4D4' : '#27272A'}`, padding: 16, display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{ borderTop: `1px solid ${isLight ? '#D4D4D4' : 'var(--c-border)'}`, padding: 16, display: 'flex', alignItems: 'center', gap: 12 }}>
                     <div style={{
-                        width: 36, height: 36, borderRadius: '50%', backgroundColor: '#1A1A1F',
-                        border: '1px solid #27272A', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: 13, fontWeight: 600, color: '#A1A1AA', flexShrink: 0,
+                        width: 36, height: 36, borderRadius: '50%', backgroundColor: 'var(--c-surface-2)',
+                        border: '1px solid var(--c-border)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: 13, fontWeight: 600, color: 'var(--c-text-2)', flexShrink: 0,
                     }}>
                         {currentUser?.fullName?.split(' ').map(n => n[0]).join('') || 'U'}
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                        <p style={{ fontSize: 14, fontWeight: 500, color: '#F5F5F4', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{currentUser?.fullName}</p>
+                        <p style={{ fontSize: 14, fontWeight: 500, color: 'var(--c-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{currentUser?.fullName}</p>
                         <p style={{ fontSize: 12, color: '#71717A', textTransform: 'capitalize' }}>{role}</p>
                     </div>
                 </div>

@@ -69,7 +69,7 @@ export default function MyRequestsPage() {
 
                 {/* Filters */}
                 <div className="page-section" style={{ display: 'flex', alignItems: 'center', gap: mobile ? 8 : 12, flexWrap: 'wrap' }}>
-                    <div style={{ display: 'flex', backgroundColor: isLight ? '#F0F0F0' : '#111113', borderRadius: 10, border: `1px solid ${isLight ? '#D4D4D4' : '#27272A'}`, overflow: 'hidden' }}>
+                    <div style={{ display: 'flex', backgroundColor: isLight ? '#F0F0F0' : 'var(--c-surface)', borderRadius: 10, border: `1px solid ${isLight ? '#D4D4D4' : 'var(--c-border)'}`, overflow: 'hidden' }}>
                         {FILTER_TABS.map(tab => (
                             <button key={tab.key} onClick={() => setActiveTab(tab.key)}
                                 style={{
@@ -87,10 +87,10 @@ export default function MyRequestsPage() {
                             value={search} onChange={(e) => setSearch(e.target.value)}
                             style={{
                                 width: '100%', height: 38, borderRadius: 10,
-                                border: `1px solid ${isLight ? '#D4D4D4' : '#27272A'}`,
-                                backgroundColor: isLight ? '#F4F4F5' : '#1E1E24',
+                                border: `1px solid ${isLight ? '#D4D4D4' : 'var(--c-border)'}`,
+                                backgroundColor: isLight ? '#F4F4F5' : 'var(--c-input)',
                                 padding: '0 12px 0 36px', fontSize: 13,
-                                color: isLight ? '#1C1917' : '#F5F5F4',
+                                color: isLight ? '#1C1917' : 'var(--c-text)',
                                 outline: 'none', fontFamily: 'inherit',
                             }}
                         />
@@ -105,19 +105,19 @@ export default function MyRequestsPage() {
                             <Link key={req.id} to={`/requests/${req.id}`} style={{ textDecoration: 'none' }}>
                                 <div style={{
                                     display: 'flex', alignItems: 'center', gap: mobile ? 10 : 16, padding: mobile ? '12px 14px' : '16px 20px',
-                                    backgroundColor: isLight ? '#FFFFFF' : '#111113',
-                                    border: `1px solid ${isLight ? '#E4E4E7' : '#27272A'}`,
+                                    backgroundColor: isLight ? '#FFFFFF' : 'var(--c-surface)',
+                                    border: `1px solid ${isLight ? '#E4E4E7' : 'var(--c-border)'}`,
                                     borderRadius: mobile ? 12 : 14, cursor: 'pointer', transition: 'all 150ms', overflow: 'hidden',
                                 }}
                                     onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'rgba(201,168,76,0.3)'; e.currentTarget.style.transform = 'translateY(-1px)' }}
-                                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = isLight ? '#E4E4E7' : '#27272A'; e.currentTarget.style.transform = 'none' }}
+                                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = isLight ? '#E4E4E7' : 'var(--c-border)'; e.currentTarget.style.transform = 'none' }}
                                 >
-                                    <div style={{ width: mobile ? 36 : 42, height: mobile ? 36 : 42, borderRadius: mobile ? 8 : 10, backgroundColor: isLight ? '#F4F4F5' : '#1A1A1F', display: 'flex', alignItems: 'center', justifyContent: 'center', color: isLight ? '#44403C' : '#A1A1AA', flexShrink: 0 }}>
+                                    <div style={{ width: mobile ? 36 : 42, height: mobile ? 36 : 42, borderRadius: mobile ? 8 : 10, backgroundColor: isLight ? '#F4F4F5' : 'var(--c-surface-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: isLight ? '#44403C' : 'var(--c-text-2)', flexShrink: 0 }}>
                                         <ServiceIcon size={mobile ? 18 : 20} weight="regular" />
                                     </div>
                                     <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
-                                            <p style={{ fontSize: mobile ? 13 : 14, fontWeight: 600, color: isLight ? '#1C1917' : '#F5F5F4', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: mobile ? '160px' : 'none' }}>{req.title}</p>
+                                            <p style={{ fontSize: mobile ? 13 : 14, fontWeight: 600, color: isLight ? '#1C1917' : 'var(--c-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: mobile ? '160px' : 'none' }}>{req.title}</p>
                                             <Badge variant={STATUS_BADGE[req.status]} size="sm">{STATUS_LABEL[req.status]}</Badge>
                                         </div>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: mobile ? 8 : 16, fontSize: mobile ? 11 : 12, color: '#71717A', flexWrap: 'wrap' }}>
@@ -128,7 +128,7 @@ export default function MyRequestsPage() {
                                     </div>
                                     {!mobile && req.driverName && (
                                         <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                                            <p style={{ fontSize: 12, color: isLight ? '#44403C' : '#A1A1AA' }}>{req.driverName}</p>
+                                            <p style={{ fontSize: 12, color: isLight ? '#44403C' : 'var(--c-text-2)' }}>{req.driverName}</p>
                                             <p style={{ fontSize: 11, color: '#71717A', textTransform: 'capitalize' }}>{req.urgency}</p>
                                         </div>
                                     )}

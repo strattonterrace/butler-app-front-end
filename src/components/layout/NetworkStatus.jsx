@@ -9,7 +9,7 @@ export function NetworkStatus() {
         <div style={{
             position: 'fixed', bottom: 80, left: '50%', transform: 'translateX(-50%)',
             zIndex: 100, padding: '10px 20px', borderRadius: 12,
-            backgroundColor: '#111113', border: '1px solid rgba(239,68,68,0.3)',
+            backgroundColor: 'var(--c-surface)', border: '1px solid rgba(239,68,68,0.3)',
             color: '#EF4444', fontSize: 14, fontWeight: 500,
             boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
             display: 'flex', alignItems: 'center', gap: 8,

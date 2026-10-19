@@ -74,7 +74,7 @@ export default function NewRequestPage() {
                 <div style={{ width: 64, height: 64, borderRadius: '50%', backgroundColor: 'rgba(34,197,94,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
                     <CheckCircle size={32} weight="fill" style={{ color: '#22C55E' }} />
                 </div>
-                <h1 style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 24, color: '#F5F5F4', marginBottom: 8 }}>Request Submitted!</h1>
+                <h1 style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 24, color: 'var(--c-text)', marginBottom: 8 }}>Request Submitted!</h1>
                 <p style={{ fontSize: 14, color: '#71717A', marginBottom: 24 }}>We&apos;ve received your request. An operator will review it shortly.</p>
                 <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
                     <Button variant="secondary" onClick={() => navigate('/dashboard')}>Back to Dashboard</Button>
@@ -108,9 +108,9 @@ export default function NewRequestPage() {
                                     style={{
                                         display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
                                         padding: '16px 12px', borderRadius: 14, textAlign: 'center', cursor: 'pointer',
-                                        border: active ? '1px solid #C9A84C' : `1px solid ${isLight ? '#E4E4E7' : '#27272A'}`,
-                                        backgroundColor: active ? 'rgba(201,168,76,0.08)' : (isLight ? '#FFFFFF' : '#111113'),
-                                        color: active ? '#C9A84C' : (isLight ? '#44403C' : '#A1A1AA'),
+                                        border: active ? '1px solid #C9A84C' : `1px solid ${isLight ? '#E4E4E7' : 'var(--c-border)'}`,
+                                        backgroundColor: active ? 'rgba(201,168,76,0.08)' : (isLight ? '#FFFFFF' : 'var(--c-surface)'),
+                                        color: active ? '#C9A84C' : (isLight ? '#44403C' : 'var(--c-text-2)'),
                                         transition: 'all 150ms',
                                     }}
                                 >
@@ -143,12 +143,12 @@ export default function NewRequestPage() {
                                         <button key={opt.value} type="button" onClick={() => setUrgency(opt.value)}
                                             style={{
                                                 padding: '12px', borderRadius: 14, textAlign: 'center', cursor: 'pointer',
-                                                border: active ? '1px solid #C9A84C' : '1px solid #27272A',
-                                                backgroundColor: active ? 'rgba(201,168,76,0.05)' : '#111113',
+                                                border: active ? '1px solid #C9A84C' : '1px solid var(--c-border)',
+                                                backgroundColor: active ? 'rgba(201,168,76,0.05)' : 'var(--c-surface)',
                                                 transition: 'all 150ms',
                                             }}
                                         >
-                                            <p style={{ fontSize: 14, fontWeight: 600, color: active ? '#C9A84C' : '#F5F5F4' }}>{opt.label}</p>
+                                            <p style={{ fontSize: 14, fontWeight: 600, color: active ? '#C9A84C' : 'var(--c-text)' }}>{opt.label}</p>
                                             <p style={{ fontSize: 12, color: '#71717A', marginTop: 2 }}>{opt.desc}</p>
                                         </button>
                                     )
@@ -164,10 +164,10 @@ export default function NewRequestPage() {
                                         <select value={form.scheduledWindow} onChange={update('scheduledWindow')}
                                             style={{
                                                 width: '100%', height: 42, borderRadius: 10,
-                                                border: `1px solid ${isLight ? '#D4D4D4' : '#27272A'}`,
-                                                backgroundColor: isLight ? '#F4F4F5' : '#1E1E24',
+                                                border: `1px solid ${isLight ? '#D4D4D4' : 'var(--c-border)'}`,
+                                                backgroundColor: isLight ? '#F4F4F5' : 'var(--c-input)',
                                                 padding: '0 12px', fontSize: 14, fontFamily: 'inherit',
-                                                color: isLight ? '#1C1917' : '#F5F5F4', outline: 'none',
+                                                color: isLight ? '#1C1917' : 'var(--c-text)', outline: 'none',
                                             }}>
                                             <option value="morning">Morning</option>
                                             <option value="afternoon">Afternoon</option>

@@ -63,7 +63,7 @@ export default function DriverTasksPage() {
                     <p className="muted-text" style={{ marginTop: 4 }}>{myTasks.filter(r => ['assigned', 'in_progress'].includes(r.status)).length} active task(s)</p>
                 </div>
 
-                <div className="page-section" style={{ display: 'flex', gap: 4, borderBottom: '1px solid #27272A', paddingBottom: 0 }}>
+                <div className="page-section" style={{ display: 'flex', gap: 4, borderBottom: '1px solid var(--c-border)', paddingBottom: 0 }}>
                     {TABS.map(tab => (
                         <button key={tab.key} onClick={() => setActiveTab(tab.key)}
                             style={{
@@ -86,18 +86,18 @@ export default function DriverTasksPage() {
                         <Card key={req.id}>
                             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 8 }}>
                                 <div>
-                                    <p style={{ fontSize: 15, fontWeight: 600, color: '#F5F5F4' }}>{req.title}</p>
+                                    <p style={{ fontSize: 15, fontWeight: 600, color: 'var(--c-text)' }}>{req.title}</p>
                                     <p style={{ fontSize: 13, color: '#71717A' }}>{SERVICE_TYPES[req.serviceType]?.label} · for {req.clientName}</p>
                                 </div>
                                 <Badge variant={STATUS_BADGE[req.status]} size="sm">{STATUS_LABEL[req.status]}</Badge>
                             </div>
 
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, margin: '12px 0', padding: '12px', backgroundColor: '#1A1A1F', borderRadius: 10 }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#A1A1AA' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, margin: '12px 0', padding: '12px', backgroundColor: 'var(--c-surface-2)', borderRadius: 10 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--c-text-2)' }}>
                                     <MapPin size={14} style={{ color: '#22C55E', flexShrink: 0 }} />
                                     <span><strong style={{ color: '#71717A', fontWeight: 400 }}>Pickup:</strong> {req.pickupLocation.split(',').slice(0, 2).join(',')}</span>
                                 </div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#A1A1AA' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--c-text-2)' }}>
                                     <MapPin size={14} style={{ color: '#EF4444', flexShrink: 0 }} />
                                     <span><strong style={{ color: '#71717A', fontWeight: 400 }}>Drop-off:</strong> {req.dropoffLocation.split(',').slice(0, 2).join(',')}</span>
                                 </div>
@@ -107,7 +107,7 @@ export default function DriverTasksPage() {
                                 <p style={{ fontSize: 13, color: '#71717A', fontStyle: 'italic', marginBottom: 12 }}>Note: {req.specialInstructions.substring(0, 80)}...</p>
                             )}
 
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 12, borderTop: '1px solid #1F1F23' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 12, borderTop: '1px solid var(--c-divider)' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: '#71717A' }}>
                                     <Clock size={14} /> {formatDate(req.updatedAt, { format: 'relative' })}
                                     <span style={{ marginLeft: 8, textTransform: 'capitalize', color: '#C9A84C' }}>{req.urgency}</span>

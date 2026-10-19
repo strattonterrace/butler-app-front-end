@@ -11,15 +11,15 @@ import { usePageTitle, useIsMobile } from '@/hooks/useEdgeCases'
 import { useUIStore } from '@/store/uiStore'
 import { Users, Car, CreditCard, CurrencyDollar, ClockCounterClockwise, ArrowRight, CheckCircle, ShoppingCart, Percent, UserPlus } from '@phosphor-icons/react'
 
-function MetricCard({ label, value, icon: Icon, color = '#A1A1AA' }) {
+function MetricCard({ label, value, icon: Icon, color = 'var(--c-text-2)' }) {
     const { theme } = useUIStore()
     const isLight = theme === 'light'
     return (
-        <div style={{ backgroundColor: isLight ? '#FFFFFF' : '#111113', border: `1px solid ${isLight ? '#E4E4E7' : '#27272A'}`, borderRadius: 'clamp(10px, 2vw, 14px)', padding: 'clamp(12px, 2vw, 16px) clamp(14px, 2.5vw, 20px)' }}>
-            <div style={{ width: 34, height: 34, borderRadius: 8, backgroundColor: isLight ? '#F4F4F5' : '#1A1A1F', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 10 }}>
+        <div style={{ backgroundColor: isLight ? '#FFFFFF' : 'var(--c-surface)', border: `1px solid ${isLight ? '#E4E4E7' : 'var(--c-border)'}`, borderRadius: 'clamp(10px, 2vw, 14px)', padding: 'clamp(12px, 2vw, 16px) clamp(14px, 2.5vw, 20px)' }}>
+            <div style={{ width: 34, height: 34, borderRadius: 8, backgroundColor: isLight ? '#F4F4F5' : 'var(--c-surface-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 10 }}>
                 <Icon size={16} style={{ color }} />
             </div>
-            <p style={{ fontSize: 'clamp(18px, 4vw, 26px)', fontWeight: 700, color: isLight ? '#1C1917' : '#F5F5F4', lineHeight: 1.1 }}>{value}</p>
+            <p style={{ fontSize: 'clamp(18px, 4vw, 26px)', fontWeight: 700, color: isLight ? '#1C1917' : 'var(--c-text)', lineHeight: 1.1 }}>{value}</p>
             <p style={{ fontSize: 'clamp(10px, 1.5vw, 12px)', color: '#71717A', marginTop: 4 }}>{label}</p>
         </div>
     )
@@ -83,7 +83,7 @@ export default function AdminDashboard() {
 
     if (loading) return (
         <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-            <div className="page-section" style={{ height: 40, width: '50%', backgroundColor: '#1A1A1F', borderRadius: 8, animation: 'skeleton-pulse 1.5s ease-in-out infinite' }} />
+            <div className="page-section" style={{ height: 40, width: '50%', backgroundColor: 'var(--c-surface-2)', borderRadius: 8, animation: 'skeleton-pulse 1.5s ease-in-out infinite' }} />
             <div className="page-section grid-stats">{[1, 2, 3, 4].map(i => <SkeletonCard key={i} lines={2} />)}</div>
             <div className="page-section grid-2col">{[1, 2].map(i => <SkeletonCard key={i} lines={5} />)}</div>
         </div>
@@ -116,7 +116,7 @@ export default function AdminDashboard() {
                 <div className="page-section">
                     <h2 className="heading-2" style={{ marginBottom: 12 }}>Operational Metrics</h2>
                     <div className="grid-stats">
-                        <MetricCard label="Total Requests" value={m.totalRequests ?? 0} icon={ShoppingCart} color="#A1A1AA" />
+                        <MetricCard label="Total Requests" value={m.totalRequests ?? 0} icon={ShoppingCart} color="var(--c-text-2)" />
                         <MetricCard label="Active Requests" value={m.activeRequests ?? 0} icon={ClockCounterClockwise} color="#F97316" />
                         <MetricCard label="Completed Today" value={m.completedRequestsToday ?? 0} icon={CheckCircle} color="#22C55E" />
                         <MetricCard label="Pending Driver Apps" value={m.pendingDriverApplications ?? 0} icon={UserPlus} color="#F59E0B" />
@@ -136,10 +136,10 @@ export default function AdminDashboard() {
                         {activity.length > 0 ? (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 10, maxHeight: 360, overflowY: 'auto' }}>
                                 {activity.map(act => (
-                                    <div key={act.id} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '8px 0', borderBottom: '1px solid #1F1F23' }}>
+                                    <div key={act.id} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '8px 0', borderBottom: '1px solid var(--c-divider)' }}>
                                         <div style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: '#71717A', marginTop: 6, flexShrink: 0 }} />
                                         <div style={{ flex: 1, minWidth: 0 }}>
-                                            <p style={{ fontSize: 13, color: '#A1A1AA', lineHeight: 1.4 }}>{act.message}</p>
+                                            <p style={{ fontSize: 13, color: 'var(--c-text-2)', lineHeight: 1.4 }}>{act.message}</p>
                                             <p style={{ fontSize: 11, color: '#52525B' }}>{formatDate(act.createdAt, { format: 'relative' })}</p>
                                         </div>
                                     </div>
@@ -164,9 +164,9 @@ export default function AdminDashboard() {
                         {pending.length > 0 ? (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                                 {pending.map(driver => (
-                                    <div key={driver.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 12, borderRadius: 10, backgroundColor: '#1A1A1F' }}>
+                                    <div key={driver.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 12, borderRadius: 10, backgroundColor: 'var(--c-surface-2)' }}>
                                         <div>
-                                            <p style={{ fontSize: 14, fontWeight: 500, color: '#F5F5F4' }}>{driver.name}</p>
+                                            <p style={{ fontSize: 14, fontWeight: 500, color: 'var(--c-text)' }}>{driver.name}</p>
                                             <p style={{ fontSize: 12, color: '#71717A' }}>{driver.vehicle}</p>
                                         </div>
                                         <div style={{ display: 'flex', gap: 8 }}>
@@ -193,7 +193,7 @@ export default function AdminDashboard() {
                         <Link key={link.to} to={link.to} style={{ textDecoration: 'none' }}>
                             <Card interactive style={{ textAlign: 'center', padding: mobile ? '16px 12px' : '24px 16px' }}>
                                 <link.icon size={mobile ? 20 : 24} style={{ color: '#71717A', margin: '0 auto 8px' }} />
-                                <p style={{ fontSize: mobile ? 12 : 14, fontWeight: 500, color: '#F5F5F4' }}>{link.label}</p>
+                                <p style={{ fontSize: mobile ? 12 : 14, fontWeight: 500, color: 'var(--c-text)' }}>{link.label}</p>
                             </Card>
                         </Link>
                     ))}

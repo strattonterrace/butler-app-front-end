@@ -27,18 +27,18 @@ export default function DriverPendingPage() {
                     <Clock size={36} weight="regular" style={{ color: '#C9A84C' }} />
                 </div>
 
-                <h1 style={{ fontSize: 24, fontWeight: 600, color: '#F5F5F4', marginBottom: 12, fontFamily: "'Satoshi', sans-serif" }}>
+                <h1 style={{ fontSize: 24, fontWeight: 600, color: 'var(--c-text)', marginBottom: 12, fontFamily: "'Satoshi', sans-serif" }}>
                     Application Under Review
                 </h1>
                 <p style={{ fontSize: 15, color: '#71717A', lineHeight: 1.6, marginBottom: 8 }}>
                     Hi {currentUser?.fullName?.split(' ')[0]}, your driver application has been received.
                 </p>
                 <p style={{ fontSize: 14, color: '#71717A', lineHeight: 1.6, marginBottom: 32 }}>
-                    Our team reviews all applications within 1–2 business days. You&apos;ll receive an email at <strong style={{ color: '#A1A1AA' }}>{currentUser?.email}</strong> once you&apos;re approved.
+                    Our team reviews all applications within 1–2 business days. You&apos;ll receive an email at <strong style={{ color: 'var(--c-text-2)' }}>{currentUser?.email}</strong> once you&apos;re approved.
                 </p>
 
-                <div style={{ backgroundColor: '#111113', border: '1px solid #27272A', borderRadius: 12, padding: 20, marginBottom: 32, textAlign: 'left' }}>
-                    <p style={{ fontSize: 13, fontWeight: 600, color: '#A1A1AA', marginBottom: 12, textTransform: 'uppercase', letterSpacing: '0.05em' }}>What happens next</p>
+                <div style={{ backgroundColor: 'var(--c-surface)', border: '1px solid var(--c-border)', borderRadius: 12, padding: 20, marginBottom: 32, textAlign: 'left' }}>
+                    <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--c-text-2)', marginBottom: 12, textTransform: 'uppercase', letterSpacing: '0.05em' }}>What happens next</p>
                     {[
                         { step: '1', text: 'Background check initiated' },
                         { step: '2', text: 'Vehicle and license verification' },
@@ -46,8 +46,8 @@ export default function DriverPendingPage() {
                         { step: '4', text: 'You\'re ready to start accepting requests' },
                     ].map(({ step, text }) => (
                         <div key={step} style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10 }}>
-                            <div style={{ width: 24, height: 24, borderRadius: '50%', backgroundColor: '#1A1A1F', border: '1px solid #27272A', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: '#C9A84C', flexShrink: 0 }}>{step}</div>
-                            <span style={{ fontSize: 14, color: '#A1A1AA' }}>{text}</span>
+                            <div style={{ width: 24, height: 24, borderRadius: '50%', backgroundColor: 'var(--c-surface-2)', border: '1px solid var(--c-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: '#C9A84C', flexShrink: 0 }}>{step}</div>
+                            <span style={{ fontSize: 14, color: 'var(--c-text-2)' }}>{text}</span>
                         </div>
                     ))}
                 </div>

@@ -36,10 +36,10 @@ export default function OperatorActivePage() {
                     <p className="muted-text" style={{ marginTop: 4 }}>{active.length} request{active.length !== 1 ? 's' : ''} in progress</p>
                 </div>
 
-                <div style={{ backgroundColor: '#111113', border: '1px solid #27272A', borderRadius: 14, overflow: 'hidden' }}>
+                <div style={{ backgroundColor: 'var(--c-surface)', border: '1px solid var(--c-border)', borderRadius: 14, overflow: 'hidden' }}>
                     <table style={{ width: '100%', fontSize: 14, borderCollapse: 'collapse' }}>
                         <thead>
-                            <tr style={{ borderBottom: '1px solid #27272A' }}>
+                            <tr style={{ borderBottom: '1px solid var(--c-border)' }}>
                                 {['Request', 'Service', 'Client', 'Driver', 'Urgency', 'Status', 'Updated'].map(h => (
                                     <th key={h} style={{ textAlign: 'left', fontSize: 11, color: '#71717A', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', padding: '12px 16px' }}>{h}</th>
                                 ))}
@@ -47,19 +47,19 @@ export default function OperatorActivePage() {
                         </thead>
                         <tbody>
                             {active.map(req => (
-                                <tr key={req.id} style={{ borderBottom: '1px solid #1F1F23', cursor: 'pointer' }}
+                                <tr key={req.id} style={{ borderBottom: '1px solid var(--c-divider)', cursor: 'pointer' }}
                                     onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(26,26,31,0.5)'}
                                     onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                                 >
-                                    <td style={{ padding: '14px 16px', fontWeight: 500, color: '#F5F5F4' }}>{req.title}</td>
-                                    <td style={{ padding: '14px 16px', color: '#A1A1AA' }}>{SERVICE_TYPES[req.serviceType]?.label}</td>
-                                    <td style={{ padding: '14px 16px', color: '#A1A1AA' }}>{req.clientName}</td>
+                                    <td style={{ padding: '14px 16px', fontWeight: 500, color: 'var(--c-text)' }}>{req.title}</td>
+                                    <td style={{ padding: '14px 16px', color: 'var(--c-text-2)' }}>{SERVICE_TYPES[req.serviceType]?.label}</td>
+                                    <td style={{ padding: '14px 16px', color: 'var(--c-text-2)' }}>{req.clientName}</td>
                                     <td style={{ padding: '14px 16px' }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                            <div style={{ width: 24, height: 24, borderRadius: '50%', backgroundColor: '#1A1A1F', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 600, color: '#A1A1AA' }}>
+                                            <div style={{ width: 24, height: 24, borderRadius: '50%', backgroundColor: 'var(--c-surface-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 600, color: 'var(--c-text-2)' }}>
                                                 {req.driverName?.split(' ').map(n => n[0]).join('') || '—'}
                                             </div>
-                                            <span style={{ color: '#A1A1AA' }}>{req.driverName || 'Unassigned'}</span>
+                                            <span style={{ color: 'var(--c-text-2)' }}>{req.driverName || 'Unassigned'}</span>
                                         </div>
                                     </td>
                                     <td style={{ padding: '14px 16px', color: '#C9A84C', fontSize: 13, textTransform: 'capitalize' }}>{req.urgency}</td>

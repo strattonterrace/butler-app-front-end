@@ -1,5 +1,5 @@
 const VARIANT_STYLES = {
-    default: { bg: '#1A1A1F', color: '#A1A1AA', border: '1px solid #27272A' },
+    default: { bg: 'var(--c-surface-2)', color: 'var(--c-text-2)', border: '1px solid var(--c-border)' },
     gold: { bg: 'rgba(201,168,76,0.1)', color: '#C9A84C', border: '1px solid rgba(201,168,76,0.25)' },
     success: { bg: 'rgba(34,197,94,0.1)', color: '#22C55E', border: '1px solid rgba(34,197,94,0.25)' },
     warning: { bg: 'rgba(245,158,11,0.1)', color: '#F59E0B', border: '1px solid rgba(245,158,11,0.25)' },

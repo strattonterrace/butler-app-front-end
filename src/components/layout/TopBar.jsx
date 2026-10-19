@@ -38,7 +38,7 @@ export function TopBar() {
                 <button
                     onClick={() => setMobileNavOpen(true)}
                     className="md:hidden"
-                    style={{ padding: 8, borderRadius: 8, border: 'none', cursor: 'pointer', backgroundColor: 'transparent', color: '#A1A1AA' }}
+                    style={{ padding: 8, borderRadius: 8, border: 'none', cursor: 'pointer', backgroundColor: 'transparent', color: 'var(--c-text-2)' }}
                 >
                     <List size={22} weight="bold" />
                 </button>
@@ -57,7 +57,7 @@ export function TopBar() {
                 {/* Notification */}
                 <button style={{
                     position: 'relative', padding: mobile ? 6 : 8, borderRadius: 8, border: 'none',
-                    cursor: 'pointer', backgroundColor: 'transparent', color: '#A1A1AA',
+                    cursor: 'pointer', backgroundColor: 'transparent', color: 'var(--c-text-2)',
                 }}>
                     <Bell size={mobile ? 18 : 20} weight="regular" />
                     <span style={{
@@ -67,7 +67,7 @@ export function TopBar() {
                 </button>
 
                 {/* User + Dropdown */}
-                <div style={{ position: 'relative', paddingLeft: mobile ? 8 : 16, borderLeft: '1px solid #27272A' }}>
+                <div style={{ position: 'relative', paddingLeft: mobile ? 8 : 16, borderLeft: '1px solid var(--c-border)' }}>
                     <button
                         onClick={() => setDropdownOpen(!dropdownOpen)}
                         style={{
@@ -76,15 +76,15 @@ export function TopBar() {
                         }}
                     >
                         <div style={{
-                            width: mobile ? 30 : 34, height: mobile ? 30 : 34, borderRadius: '50%', backgroundColor: '#1A1A1F',
-                            border: '1px solid #27272A', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            fontSize: mobile ? 11 : 12, fontWeight: 600, color: '#A1A1AA',
+                            width: mobile ? 30 : 34, height: mobile ? 30 : 34, borderRadius: '50%', backgroundColor: 'var(--c-surface-2)',
+                            border: '1px solid var(--c-border)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            fontSize: mobile ? 11 : 12, fontWeight: 600, color: 'var(--c-text-2)',
                         }}>
                             {currentUser?.fullName?.split(' ').map(n => n[0]).join('') || 'U'}
                         </div>
                         {!mobile && (
                             <div style={{ textAlign: 'left' }}>
-                                <p style={{ fontSize: 14, fontWeight: 500, color: '#F5F5F4', lineHeight: 1.2 }}>{currentUser?.fullName}</p>
+                                <p style={{ fontSize: 14, fontWeight: 500, color: 'var(--c-text)', lineHeight: 1.2 }}>{currentUser?.fullName}</p>
                                 <p style={{ fontSize: 12, color: '#71717A' }}>{currentUser?.email}</p>
                             </div>
                         )}
@@ -96,13 +96,13 @@ export function TopBar() {
                             <div onClick={() => setDropdownOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 30 }} />
                             <div style={{
                                 position: 'absolute', top: '100%', right: 0, marginTop: 8,
-                                width: 220, backgroundColor: '#111113', border: '1px solid #27272A',
+                                width: 220, backgroundColor: 'var(--c-surface)', border: '1px solid var(--c-border)',
                                 borderRadius: 12, padding: 4, zIndex: 40,
                                 boxShadow: '0 10px 25px rgba(0,0,0,0.4)',
                             }}>
                                 {/* Role badge inside dropdown */}
-                                <div style={{ padding: '10px 12px', borderBottom: '1px solid #1F1F23', marginBottom: 4 }}>
-                                    <p style={{ fontSize: 13, fontWeight: 500, color: '#F5F5F4' }}>{currentUser?.fullName}</p>
+                                <div style={{ padding: '10px 12px', borderBottom: '1px solid var(--c-divider)', marginBottom: 4 }}>
+                                    <p style={{ fontSize: 13, fontWeight: 500, color: 'var(--c-text)' }}>{currentUser?.fullName}</p>
                                     <span style={{
                                         display: 'inline-block', marginTop: 4, padding: '2px 8px', borderRadius: 999,
                                         fontSize: 10, fontWeight: 600, textTransform: 'capitalize',
@@ -116,10 +116,10 @@ export function TopBar() {
                                         style={{
                                             display: 'flex', alignItems: 'center', gap: 10, width: '100%',
                                             padding: '10px 12px', borderRadius: 8, border: 'none', cursor: 'pointer',
-                                            backgroundColor: 'transparent', color: '#A1A1AA', fontSize: 14,
+                                            backgroundColor: 'transparent', color: 'var(--c-text-2)', fontSize: 14,
                                             textAlign: 'left', transition: 'background-color 150ms',
                                         }}
-                                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1A1A1F'}
+                                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--c-surface-2)'}
                                         onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                                     >
                                         <Gear size={16} /> Account Settings

@@ -17,9 +17,9 @@ function StatsCard({ label, value, icon: Icon, accent }) {
     const { theme } = useUIStore()
     const isLight = theme === 'light'
     return (
-        <div style={{ backgroundColor: isLight ? '#FFFFFF' : '#111113', border: `1px solid ${isLight ? '#E4E4E7' : '#27272A'}`, borderRadius: 'clamp(10px, 2vw, 14px)', padding: 'clamp(12px, 2vw, 16px) clamp(14px, 2.5vw, 20px)' }}>
+        <div style={{ backgroundColor: isLight ? '#FFFFFF' : 'var(--c-surface)', border: `1px solid ${isLight ? '#E4E4E7' : 'var(--c-border)'}`, borderRadius: 'clamp(10px, 2vw, 14px)', padding: 'clamp(12px, 2vw, 16px) clamp(14px, 2.5vw, 20px)' }}>
             <Icon size={16} style={{ color: accent, marginBottom: 'clamp(4px, 1vw, 6px)' }} />
-            <p style={{ fontSize: 'clamp(18px, 4vw, 26px)', fontWeight: 700, color: isLight ? '#1C1917' : '#F5F5F4', lineHeight: 1.1 }}>{value}</p>
+            <p style={{ fontSize: 'clamp(18px, 4vw, 26px)', fontWeight: 700, color: isLight ? '#1C1917' : 'var(--c-text)', lineHeight: 1.1 }}>{value}</p>
             <p style={{ fontSize: 'clamp(10px, 1.5vw, 12px)', color: '#71717A', marginTop: 'clamp(2px, 0.5vw, 4px)' }}>{label}</p>
         </div>
     )
@@ -32,7 +32,7 @@ function TaskCard({ request, type, onAdvance, busy }) {
         <Card>
             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 8 }}>
                 <div style={{ minWidth: 0, flex: 1 }}>
-                    <p style={{ fontSize: 14, fontWeight: 600, color: isLight ? '#1C1917' : '#F5F5F4', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{request.title}</p>
+                    <p style={{ fontSize: 14, fontWeight: 600, color: isLight ? '#1C1917' : 'var(--c-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{request.title}</p>
                     <p style={{ fontSize: 12, color: '#71717A' }}>{SERVICE_TYPES[request.serviceType]?.label} · {request.clientName}</p>
                 </div>
                 <Badge variant={STATUS_BADGE[request.status]} size="sm">{STATUS_LABEL[request.status]}</Badge>
@@ -41,7 +41,7 @@ function TaskCard({ request, type, onAdvance, busy }) {
                 <MapPin size={13} />{request.pickupLocation.split(',')[0]}
                 <span style={{ margin: '0 4px' }}>→</span>{request.dropoffLocation.split(',')[0]}
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 12, paddingTop: 12, borderTop: `1px solid ${isLight ? '#F0F0F0' : '#1F1F23'}` }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 12, paddingTop: 12, borderTop: `1px solid ${isLight ? '#F0F0F0' : 'var(--c-divider)'}` }}>
                 <span style={{ fontSize: 12, color: '#71717A', textTransform: 'capitalize' }}>{request.urgency}</span>
                 {type === 'assigned'
                     ? <Button size="sm" disabled={busy} onClick={() => onAdvance(request, 'in_progress', 'Task started')}><Play size={14} weight="fill" /> {busy ? 'Starting…' : 'Start Task'}</Button>
@@ -93,7 +93,7 @@ export default function DriverDashboard() {
 
     if (loading) return (
         <div style={{ maxWidth: 900, margin: '0 auto' }}>
-            <div className="page-section" style={{ height: 40, width: '50%', backgroundColor: '#1A1A1F', borderRadius: 8, animation: 'skeleton-pulse 1.5s ease-in-out infinite' }} />
+            <div className="page-section" style={{ height: 40, width: '50%', backgroundColor: 'var(--c-surface-2)', borderRadius: 8, animation: 'skeleton-pulse 1.5s ease-in-out infinite' }} />
             <div className="page-section grid-stats">{[1, 2, 3, 4].map(i => <SkeletonCard key={i} lines={1} />)}</div>
             <div className="page-section grid-cards">{[1, 2].map(i => <SkeletonCard key={i} lines={3} />)}</div>
         </div>
@@ -147,7 +147,7 @@ export default function DriverDashboard() {
                     <Card>
                         <div style={{ textAlign: 'center', padding: '40px 0' }}>
                             <ListChecks size={40} style={{ color: '#71717A', margin: '0 auto 12px' }} />
-                            <h3 style={{ fontSize: 16, fontWeight: 600, color: '#F5F5F4', marginBottom: 4 }}>All clear</h3>
+                            <h3 style={{ fontSize: 16, fontWeight: 600, color: 'var(--c-text)', marginBottom: 4 }}>All clear</h3>
                             <p style={{ fontSize: 14, color: '#71717A' }}>No tasks assigned to you at the moment.</p>
                         </div>
                     </Card>

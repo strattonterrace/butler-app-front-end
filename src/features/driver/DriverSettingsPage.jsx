@@ -67,25 +67,25 @@ export default function DriverSettingsPage() {
                     <h3 className="heading-2">Availability</h3>
                 </div>
 
-                <p style={{ fontSize: 14, color: '#A1A1AA', marginBottom: 10 }}>Available Days</p>
+                <p style={{ fontSize: 14, color: 'var(--c-text-2)', marginBottom: 10 }}>Available Days</p>
                 <div style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
                     {DAYS.map(day => (
                         <button key={day} type="button" onClick={() => toggleDay(day)}
                             style={{
                                 padding: '8px 14px', borderRadius: 8, fontSize: 13, fontWeight: 500, cursor: 'pointer',
-                                border: form.days.includes(day) ? '1px solid #C9A84C' : '1px solid #27272A',
-                                backgroundColor: form.days.includes(day) ? 'rgba(201,168,76,0.08)' : '#1A1A1F',
-                                color: form.days.includes(day) ? '#C9A84C' : '#A1A1AA', transition: 'all 150ms',
+                                border: form.days.includes(day) ? '1px solid #C9A84C' : '1px solid var(--c-border)',
+                                backgroundColor: form.days.includes(day) ? 'rgba(201,168,76,0.08)' : 'var(--c-surface-2)',
+                                color: form.days.includes(day) ? '#C9A84C' : 'var(--c-text-2)', transition: 'all 150ms',
                             }}
                         >{day}</button>
                     ))}
                 </div>
 
-                <p style={{ fontSize: 14, color: '#A1A1AA', marginBottom: 8 }}>Available Hours</p>
+                <p style={{ fontSize: 14, color: 'var(--c-text-2)', marginBottom: 8 }}>Available Hours</p>
                 <select value={form.hours} onChange={(e) => setForm({ ...form, hours: e.target.value })}
                     style={{
-                        width: '100%', height: 44, borderRadius: 10, border: '1px solid #27272A',
-                        backgroundColor: '#1E1E24', padding: '0 14px', fontSize: 14, color: '#F5F5F4',
+                        width: '100%', height: 44, borderRadius: 10, border: '1px solid var(--c-border)',
+                        backgroundColor: 'var(--c-input)', padding: '0 14px', fontSize: 14, color: 'var(--c-text)',
                         fontFamily: 'inherit', cursor: 'pointer', outline: 'none',
                     }}>
                     {HOURS.map(h => <option key={h} value={h}>{h}</option>)}
@@ -99,7 +99,7 @@ export default function DriverSettingsPage() {
             </div>
 
             {/* Logout */}
-            <div style={{ paddingTop: 20, borderTop: '1px solid #27272A' }}>
+            <div style={{ paddingTop: 20, borderTop: '1px solid var(--c-border)' }}>
                 <button onClick={logout}
                     style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, fontWeight: 500, color: '#EF4444', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
                 >

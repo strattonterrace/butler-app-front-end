@@ -170,7 +170,7 @@ export default function SettingsPage() {
             </div>
 
             {/* Tabs */}
-            <div className="page-section" style={{ display: 'flex', gap: 4, borderBottom: '1px solid #27272A', paddingBottom: 0 }}>
+            <div className="page-section" style={{ display: 'flex', gap: 4, borderBottom: '1px solid var(--c-border)', paddingBottom: 0 }}>
                 {TABS.map(tab => (
                     <button key={tab.key} onClick={() => setActiveTab(tab.key)}
                         style={{
@@ -214,9 +214,9 @@ export default function SettingsPage() {
                         <h3 className="heading-2" style={{ marginBottom: 8 }}>Subscription</h3>
                         {subIsActive || subIsPastDue ? (
                             <>
-                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid #1F1F23' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid var(--c-divider)' }}>
                                     <div>
-                                        <p style={{ fontSize: 14, fontWeight: 500, color: '#F5F5F4' }}>Butler Premium</p>
+                                        <p style={{ fontSize: 14, fontWeight: 500, color: 'var(--c-text)' }}>Butler Premium</p>
                                         <p style={{ fontSize: 13, color: '#71717A' }}>
                                             ${Number(sub.planAmount || 199).toFixed(0)}/month
                                             {sub.cancelAtPeriodEnd && sub.currentPeriodEnd
@@ -358,9 +358,9 @@ export default function SettingsPage() {
                         { label: 'Request completed', desc: 'Get notified when your request is completed', default: true },
                         { label: 'Marketing emails', desc: 'Receive promotional emails and offers', default: false },
                     ].map((pref, i) => (
-                        <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 0', borderBottom: i < 3 ? '1px solid #1F1F23' : 'none' }}>
+                        <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 0', borderBottom: i < 3 ? '1px solid var(--c-divider)' : 'none' }}>
                             <div>
-                                <p style={{ fontSize: 14, fontWeight: 500, color: '#F5F5F4' }}>{pref.label}</p>
+                                <p style={{ fontSize: 14, fontWeight: 500, color: 'var(--c-text)' }}>{pref.label}</p>
                                 <p style={{ fontSize: 13, color: '#71717A' }}>{pref.desc}</p>
                             </div>
                             <label style={{ position: 'relative', width: 44, height: 24, cursor: 'pointer' }}>
@@ -369,10 +369,10 @@ export default function SettingsPage() {
                                         const dot = e.target.nextSibling.querySelector('span')
                                         const track = e.target.nextSibling
                                         if (e.target.checked) { track.style.backgroundColor = '#C9A84C'; dot.style.transform = 'translateX(20px)' }
-                                        else { track.style.backgroundColor = '#27272A'; dot.style.transform = 'translateX(0)' }
+                                        else { track.style.backgroundColor = 'var(--c-border)'; dot.style.transform = 'translateX(0)' }
                                     }}
                                 />
-                                <div style={{ width: 44, height: 24, borderRadius: 12, transition: 'background-color 200ms', backgroundColor: pref.default ? '#C9A84C' : '#27272A', padding: 2 }}>
+                                <div style={{ width: 44, height: 24, borderRadius: 12, transition: 'background-color 200ms', backgroundColor: pref.default ? '#C9A84C' : 'var(--c-border)', padding: 2 }}>
                                     <span style={{ display: 'block', width: 20, height: 20, borderRadius: '50%', backgroundColor: '#fff', transition: 'transform 200ms', transform: pref.default ? 'translateX(20px)' : 'translateX(0)' }} />
                                 </div>
                             </label>
@@ -385,7 +385,7 @@ export default function SettingsPage() {
             )}
 
             {/* Sign out */}
-            <div style={{ marginTop: 32, paddingTop: 20, borderTop: '1px solid #27272A' }}>
+            <div style={{ marginTop: 32, paddingTop: 20, borderTop: '1px solid var(--c-border)' }}>
                 <button onClick={handleLogout}
                     style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, fontWeight: 500, color: '#EF4444', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
                 >

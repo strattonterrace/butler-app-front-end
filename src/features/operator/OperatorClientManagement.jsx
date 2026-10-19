@@ -48,7 +48,7 @@ export default function OperatorClientManagement() {
 
     if (loading) return (
         <div style={{ maxWidth: 1000, margin: '0 auto' }}>
-            <div className="page-section" style={{ height: 40, width: '50%', backgroundColor: '#1A1A1F', borderRadius: 8, animation: 'skeleton-pulse 1.5s ease-in-out infinite' }} />
+            <div className="page-section" style={{ height: 40, width: '50%', backgroundColor: 'var(--c-surface-2)', borderRadius: 8, animation: 'skeleton-pulse 1.5s ease-in-out infinite' }} />
             <div className="page-section grid-cards">{[1, 2, 3].map(i => <SkeletonCard key={i} lines={3} />)}</div>
         </div>
     )
@@ -69,7 +69,7 @@ export default function OperatorClientManagement() {
                     <div style={{ position: 'relative', maxWidth: mobile ? '100%' : 360 }}>
                         <MagnifyingGlass size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#71717A' }} />
                         <input placeholder="Search clients..." value={search} onChange={e => setSearch(e.target.value)}
-                            style={{ width: '100%', height: 38, borderRadius: 10, border: '1px solid #27272A', backgroundColor: '#1E1E24', padding: '0 12px 0 36px', fontSize: 13, color: '#F5F5F4', outline: 'none', fontFamily: 'inherit' }}
+                            style={{ width: '100%', height: 38, borderRadius: 10, border: '1px solid var(--c-border)', backgroundColor: 'var(--c-input)', padding: '0 12px 0 36px', fontSize: 13, color: 'var(--c-text)', outline: 'none', fontFamily: 'inherit' }}
                         />
                     </div>
                 </div>
@@ -78,7 +78,7 @@ export default function OperatorClientManagement() {
                     <Card>
                         <div style={{ textAlign: 'center', padding: '40px 0' }}>
                             <Users size={40} style={{ color: '#71717A', margin: '0 auto 12px' }} />
-                            <h3 style={{ fontSize: 16, fontWeight: 600, color: '#F5F5F4', marginBottom: 4 }}>
+                            <h3 style={{ fontSize: 16, fontWeight: 600, color: 'var(--c-text)', marginBottom: 4 }}>
                                 {search ? 'No clients match your search' : 'No clients yet'}
                             </h3>
                             <p style={{ fontSize: 14, color: '#71717A' }}>
@@ -93,10 +93,10 @@ export default function OperatorClientManagement() {
                         </div>
                     </Card>
                 ) : (
-                    <div className="responsive-table" style={{ backgroundColor: '#111113', border: '1px solid #27272A', borderRadius: 14, overflow: 'hidden' }}>
+                    <div className="responsive-table" style={{ backgroundColor: 'var(--c-surface)', border: '1px solid var(--c-border)', borderRadius: 14, overflow: 'hidden' }}>
                         <table style={{ width: '100%', fontSize: 13, borderCollapse: 'collapse' }}>
                             <thead>
-                                <tr style={{ borderBottom: '1px solid #27272A' }}>
+                                <tr style={{ borderBottom: '1px solid var(--c-border)' }}>
                                     {['Client', 'Plan', 'Requests', 'Last Active'].map(h => (
                                         <th key={h} style={{ textAlign: 'left', fontSize: 10, color: '#71717A', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', padding: '10px 14px', whiteSpace: 'nowrap' }}>{h}</th>
                                     ))}
@@ -104,10 +104,10 @@ export default function OperatorClientManagement() {
                             </thead>
                             <tbody>
                                 {clients.map(c => (
-                                    <tr key={c.id} style={{ borderBottom: '1px solid #1F1F23' }}>
-                                        <td style={{ padding: '12px 14px', fontWeight: 500, color: '#F5F5F4', whiteSpace: 'nowrap' }}>{c.name}</td>
+                                    <tr key={c.id} style={{ borderBottom: '1px solid var(--c-divider)' }}>
+                                        <td style={{ padding: '12px 14px', fontWeight: 500, color: 'var(--c-text)', whiteSpace: 'nowrap' }}>{c.name}</td>
                                         <td style={{ padding: '12px 14px', color: '#C9A84C', fontSize: 12 }}>Premium · {formatCurrency(199)}/mo</td>
-                                        <td style={{ padding: '12px 14px', color: '#A1A1AA', textAlign: 'center' }}>{c.totalOrders}</td>
+                                        <td style={{ padding: '12px 14px', color: 'var(--c-text-2)', textAlign: 'center' }}>{c.totalOrders}</td>
                                         <td style={{ padding: '12px 14px', color: '#71717A', whiteSpace: 'nowrap' }}>{formatDate(c.lastActivity, { format: 'relative' })}</td>
                                     </tr>
                                 ))}

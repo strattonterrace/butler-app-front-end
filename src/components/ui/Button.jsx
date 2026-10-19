@@ -3,9 +3,10 @@ import { SpinnerGap } from '@phosphor-icons/react'
 import { useIsMobile } from '@/hooks/useEdgeCases'
 
 const VARIANTS = {
+    // primary: dark text on gold — stays fixed in both themes (don't tokenize).
     primary: { bg: '#C9A84C', color: '#0A0A0B', border: 'none', hoverBg: '#DAC06A', fontWeight: 600 },
-    secondary: { bg: '#1A1A1F', color: '#F5F5F4', border: '1px solid #27272A', hoverBg: '#252530', fontWeight: 500 },
-    ghost: { bg: 'transparent', color: '#A1A1AA', border: 'none', hoverBg: '#252530', fontWeight: 500 },
+    secondary: { bg: 'var(--c-surface-2)', color: 'var(--c-text)', border: '1px solid var(--c-border)', hoverBg: '#252530', fontWeight: 500 },
+    ghost: { bg: 'transparent', color: 'var(--c-text-2)', border: 'none', hoverBg: '#252530', fontWeight: 500 },
     destructive: { bg: 'rgba(239,68,68,0.1)', color: '#EF4444', border: '1px solid rgba(239,68,68,0.2)', hoverBg: 'rgba(239,68,68,0.2)', fontWeight: 500 },
 }
 

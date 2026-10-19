@@ -77,7 +77,7 @@ export default function OperatorQueuePage() {
         .filter(r => !serviceFilter || r.serviceType === serviceFilter)
         .filter(r => !urgencyFilter || r.urgency === urgencyFilter)
 
-    const selectStyle = { height: 34, borderRadius: 8, border: '1px solid #27272A', backgroundColor: '#1E1E24', color: '#F5F5F4', padding: '0 10px', fontSize: 13, fontFamily: 'inherit', cursor: 'pointer', outline: 'none' }
+    const selectStyle = { height: 34, borderRadius: 8, border: '1px solid var(--c-border)', backgroundColor: 'var(--c-input)', color: 'var(--c-text)', padding: '0 10px', fontSize: 13, fontFamily: 'inherit', cursor: 'pointer', outline: 'none' }
 
     if (loading) {
         return <div style={{ maxWidth: 1000, margin: '0 auto' }}><SkeletonCard /><SkeletonCard /><SkeletonCard /></div>
@@ -94,7 +94,7 @@ export default function OperatorQueuePage() {
                     <div style={{ position: 'relative', width: 240 }}>
                         <MagnifyingGlass size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#71717A' }} />
                         <input placeholder="Search..." value={search} onChange={(e) => setSearch(e.target.value)}
-                            style={{ width: '100%', height: 38, borderRadius: 10, border: '1px solid #27272A', backgroundColor: '#1E1E24', padding: '0 12px 0 36px', fontSize: 13, color: '#F5F5F4', outline: 'none', fontFamily: 'inherit' }} />
+                            style={{ width: '100%', height: 38, borderRadius: 10, border: '1px solid var(--c-border)', backgroundColor: 'var(--c-input)', padding: '0 12px 0 36px', fontSize: 13, color: 'var(--c-text)', outline: 'none', fontFamily: 'inherit' }} />
                     </div>
                 </div>
             </div>
@@ -113,7 +113,7 @@ export default function OperatorQueuePage() {
                 </select>
                 {(serviceFilter || urgencyFilter) && (
                     <button onClick={() => { setServiceFilter(''); setUrgencyFilter('') }}
-                        style={{ padding: '6px 12px', borderRadius: 8, fontSize: 12, border: '1px solid #27272A', backgroundColor: 'transparent', color: '#C9A84C', cursor: 'pointer' }}>
+                        style={{ padding: '6px 12px', borderRadius: 8, fontSize: 12, border: '1px solid var(--c-border)', backgroundColor: 'transparent', color: '#C9A84C', cursor: 'pointer' }}>
                         Clear Filters
                     </button>
                 )}
@@ -125,7 +125,7 @@ export default function OperatorQueuePage() {
                         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 12 }}>
                             <div>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                                    <p style={{ fontSize: 15, fontWeight: 600, color: '#F5F5F4' }}>{req.title}</p>
+                                    <p style={{ fontSize: 15, fontWeight: 600, color: 'var(--c-text)' }}>{req.title}</p>
                                     <Badge variant={STATUS_BADGE[req.status]} size="sm">{STATUS_LABEL[req.status]}</Badge>
                                 </div>
                                 <p style={{ fontSize: 13, color: '#71717A' }}>{SERVICE_TYPES[req.serviceType]?.label} · Submitted by {req.clientName}</p>
@@ -133,7 +133,7 @@ export default function OperatorQueuePage() {
                             <span style={{ fontSize: 12, color: '#C9A84C', fontWeight: 500, textTransform: 'capitalize', flexShrink: 0 }}>{req.urgency}</span>
                         </div>
 
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 24, fontSize: 13, color: '#A1A1AA', marginBottom: 12 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 24, fontSize: 13, color: 'var(--c-text-2)', marginBottom: 12 }}>
                             <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><MapPin size={14} /> {req.pickupLocation.split(',')[0]}</span>
                             <span>→</span>
                             <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><MapPin size={14} /> {req.dropoffLocation.split(',')[0]}</span>
@@ -141,10 +141,10 @@ export default function OperatorQueuePage() {
                         </div>
 
                         {req.specialInstructions && (
-                            <p style={{ fontSize: 13, color: '#71717A', fontStyle: 'italic', marginBottom: 12, padding: '8px 12px', backgroundColor: '#1A1A1F', borderRadius: 8 }}>"{req.specialInstructions.substring(0, 100)}{req.specialInstructions.length > 100 ? '...' : ''}"</p>
+                            <p style={{ fontSize: 13, color: '#71717A', fontStyle: 'italic', marginBottom: 12, padding: '8px 12px', backgroundColor: 'var(--c-surface-2)', borderRadius: 8 }}>"{req.specialInstructions.substring(0, 100)}{req.specialInstructions.length > 100 ? '...' : ''}"</p>
                         )}
 
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, paddingTop: 12, borderTop: '1px solid #1F1F23' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, paddingTop: 12, borderTop: '1px solid var(--c-divider)' }}>
                             {req.status === 'submitted' && (
                                 <Button size="sm" disabled={actingId === req.id} onClick={() => markReviewed(req)}>
                                     {actingId === req.id ? 'Working…' : 'Mark Reviewed'}
@@ -156,8 +156,8 @@ export default function OperatorQueuePage() {
                                     defaultValue=""
                                     onChange={(e) => { if (e.target.value) assignDriver(req, e.target.value, e.target.selectedOptions[0].text) }}
                                     style={{
-                                        height: 34, borderRadius: 8, border: '1px solid #27272A', backgroundColor: '#1E1E24',
-                                        color: '#F5F5F4', padding: '0 12px', fontSize: 13, fontFamily: 'inherit', cursor: 'pointer',
+                                        height: 34, borderRadius: 8, border: '1px solid var(--c-border)', backgroundColor: 'var(--c-input)',
+                                        color: 'var(--c-text)', padding: '0 12px', fontSize: 13, fontFamily: 'inherit', cursor: 'pointer',
                                     }}>
                                     <option value="">{drivers.length === 0 ? 'No drivers available' : 'Assign to driver…'}</option>
                                     {drivers.map(d => (

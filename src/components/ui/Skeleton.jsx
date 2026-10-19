@@ -6,7 +6,7 @@ export function Skeleton({ width, height = 16, borderRadius = 6, style = {} }) {
     return (
         <div style={{
             width: width || '100%', height, borderRadius,
-            backgroundColor: '#1A1A1F',
+            backgroundColor: 'var(--c-surface-2)',
             animation: 'skeleton-pulse 1.5s ease-in-out infinite',
             ...style,
         }} />
@@ -19,7 +19,7 @@ export function Skeleton({ width, height = 16, borderRadius = 6, style = {} }) {
 export function SkeletonCard({ lines = 3, style = {} }) {
     return (
         <div style={{
-            backgroundColor: '#111113', border: '1px solid #27272A',
+            backgroundColor: 'var(--c-surface)', border: '1px solid var(--c-border)',
             borderRadius: 14, padding: 20, ...style,
         }}>
             <Skeleton width="40%" height={18} style={{ marginBottom: 12 }} />
@@ -36,18 +36,18 @@ export function SkeletonCard({ lines = 3, style = {} }) {
 export function SkeletonTable({ rows = 5, cols = 4, style = {} }) {
     return (
         <div style={{
-            backgroundColor: '#111113', border: '1px solid #27272A',
+            backgroundColor: 'var(--c-surface)', border: '1px solid var(--c-border)',
             borderRadius: 14, overflow: 'hidden', ...style,
         }}>
             {/* Header row */}
-            <div style={{ display: 'flex', gap: 16, padding: '14px 16px', borderBottom: '1px solid #27272A' }}>
+            <div style={{ display: 'flex', gap: 16, padding: '14px 16px', borderBottom: '1px solid var(--c-border)' }}>
                 {Array.from({ length: cols }, (_, i) => (
                     <Skeleton key={i} width={`${100 / cols - 4}%`} height={12} borderRadius={4} />
                 ))}
             </div>
             {/* Data rows */}
             {Array.from({ length: rows }, (_, r) => (
-                <div key={r} style={{ display: 'flex', gap: 16, padding: '14px 16px', borderBottom: '1px solid #1F1F23' }}>
+                <div key={r} style={{ display: 'flex', gap: 16, padding: '14px 16px', borderBottom: '1px solid var(--c-divider)' }}>
                     {Array.from({ length: cols }, (_, c) => (
                         <Skeleton key={c} width={`${100 / cols - 4}%`} height={14} borderRadius={4} />
                     ))}
