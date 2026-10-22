@@ -1,5 +1,4 @@
-/* ── Font Imports ── */
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap');
+/* Fonts are self-hosted via @fontsource (imported in main.jsx) — no Google CDN. */
 
 @import "tailwindcss";
 

@@ -103,11 +103,17 @@ export default function SubscribePage() {
                         {subIsActive ? 'Continue to Dashboard' : 'Subscribe — $199/month'}
                     </Button>
 
-                    <p style={{ fontSize: 12, color: '#52525B', marginTop: 12 }}>
-                        {subIsActive
-                            ? 'Your membership is active.'
-                            : 'Secure checkout powered by Stripe. Cancel anytime from Settings.'}
-                    </p>
+                    {subIsActive ? (
+                        <p style={{ fontSize: 12, color: '#52525B', marginTop: 12 }}>
+                            Your membership is active.
+                        </p>
+                    ) : (
+                        <p style={{ fontSize: 12, color: '#71717A', marginTop: 12, lineHeight: 1.55 }}>
+                            Your Butler membership is <strong style={{ color: '#A1A1AA' }}>$199/month and renews
+                            automatically</strong> each month until you cancel. You can cancel anytime in
+                            Settings — no fees, no questions. Secure checkout powered by Stripe.
+                        </p>
+                    )}
 
                     {!subIsActive && isAuthenticated && (
                         <button
