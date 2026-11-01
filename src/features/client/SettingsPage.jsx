@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'
 import { authApi } from '@/api/auth'
 import { subscriptionsApi } from '@/api/subscriptions'
+import { addressesApi } from '@/api/addresses'
 import { extractErrorMessage } from '@/api/client'
 import { toast } from 'sonner'
 import { Button, Input, Card } from '@/components/ui'
@@ -162,6 +163,72 @@ export default function SettingsPage() {
         }
     }
 
+    // ── Saved Addresses (address book) ──────────────────────────────────────────
+    const [addresses, setAddresses] = useState([])
+    const [addrLoading, setAddrLoading] = useState(true)
+    // addrForm: null = closed; otherwise { id?, label, address, isDefault }
+    const [addrForm, setAddrForm] = useState(null)
+    const [addrSaving, setAddrSaving] = useState(false)
+
+    useEffect(() => {
+        let cancelled = false
+        addressesApi.list()
+            .then((data) => { if (!cancelled) setAddresses(data) })
+            .catch(() => { /* leave empty — card shows the empty state */ })
+            .finally(() => { if (!cancelled) setAddrLoading(false) })
+        return () => { cancelled = true }
+    }, [])
+
+    const openAddrForm = (addr = null) =>
+        setAddrForm(
+            addr
+                ? { id: addr.id, label: addr.label, address: addr.address, isDefault: addr.isDefault }
+                : { label: '', address: '', isDefault: addresses.length === 0 },
+        )
+
+    const handleAddrSave = async () => {
+        if (!addrForm.label.trim() || !addrForm.address.trim()) {
+            toast.error('Add a label and an address')
+            return
+        }
+        setAddrSaving(true)
+        const payload = {
+            label: addrForm.label.trim(),
+            address: addrForm.address.trim(),
+            isDefault: addrForm.isDefault,
+        }
+        try {
+            if (addrForm.id) await addressesApi.update(addrForm.id, payload)
+            else await addressesApi.create(payload)
+            setAddresses(await addressesApi.list())
+            setAddrForm(null)
+            toast.success('Address saved')
+        } catch (error) {
+            toast.error('Could not save address', { description: extractErrorMessage(error) })
+        } finally {
+            setAddrSaving(false)
+        }
+    }
+
+    const handleAddrDelete = async (id) => {
+        try {
+            await addressesApi.remove(id)
+            setAddresses((prev) => prev.filter((a) => a.id !== id))
+            toast.success('Address removed')
+        } catch (error) {
+            toast.error('Could not remove address', { description: extractErrorMessage(error) })
+        }
+    }
+
+    const handleAddrSetDefault = async (id) => {
+        try {
+            await addressesApi.update(id, { isDefault: true })
+            setAddresses(await addressesApi.list())
+        } catch (error) {
+            toast.error('Could not update default', { description: extractErrorMessage(error) })
+        }
+    }
+
     return (
         <div style={{ maxWidth: 800, margin: '0 auto' }}>
             <div className="page-section">
@@ -283,18 +350,74 @@ export default function SettingsPage() {
                         )}
                     </Card>
 
-                    {/* Saved Addresses — CRUD endpoints land in M3 */}
+                    {/* Saved Addresses — reusable address book (Home, Work, etc.) */}
                     <Card style={{ marginBottom: 16 }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
                             <h3 className="heading-2">Saved Addresses</h3>
-                            <Button variant="secondary" size="sm"
-                                onClick={() => toast.info('Saved addresses coming in M3')}>
-                                + Add Address
-                            </Button>
+                            {!addrForm && !addrLoading && (
+                                <Button variant="secondary" size="sm" onClick={() => openAddrForm()}>
+                                    + Add Address
+                                </Button>
+                            )}
                         </div>
-                        <p style={{ fontSize: 13, color: '#71717A', padding: '8px 0' }}>
-                            Address management will be available in the next update.
-                        </p>
+
+                        {addrLoading ? (
+                            <p style={{ fontSize: 13, color: '#71717A', padding: '8px 0' }}>Loading…</p>
+                        ) : (
+                            <>
+                                {addresses.length === 0 && !addrForm && (
+                                    <p style={{ fontSize: 13, color: '#71717A', padding: '8px 0' }}>
+                                        No saved addresses yet. Add your home, work, or anywhere you order to often —
+                                        they'll be ready to pick when you place a request.
+                                    </p>
+                                )}
+
+                                {addresses.map((a) => (
+                                    <div key={a.id} style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, padding: '12px 0', borderBottom: '1px solid var(--c-divider)' }}>
+                                        <div style={{ minWidth: 0 }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                                <p style={{ fontSize: 14, fontWeight: 500, color: 'var(--c-text)' }}>{a.label}</p>
+                                                {a.isDefault && (
+                                                    <span style={{ padding: '2px 8px', borderRadius: 999, fontSize: 10, fontWeight: 600, backgroundColor: 'rgba(201,168,76,0.12)', color: '#C9A84C', border: '1px solid rgba(201,168,76,0.3)' }}>
+                                                        Default
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <p style={{ fontSize: 13, color: '#71717A', marginTop: 2, wordBreak: 'break-word' }}>{a.address}</p>
+                                        </div>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0 }}>
+                                            {!a.isDefault && (
+                                                <Button variant="ghost" size="sm" onClick={() => handleAddrSetDefault(a.id)}>Set default</Button>
+                                            )}
+                                            <Button variant="ghost" size="sm" onClick={() => openAddrForm(a)}>Edit</Button>
+                                            <Button variant="ghost" size="sm" style={{ color: '#EF4444' }} onClick={() => handleAddrDelete(a.id)}>Delete</Button>
+                                        </div>
+                                    </div>
+                                ))}
+
+                                {addrForm && (
+                                    <div style={{ paddingTop: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                        <Input label="Label" placeholder="Home, Work, Mom's place…"
+                                            value={addrForm.label}
+                                            onChange={(e) => setAddrForm({ ...addrForm, label: e.target.value })} />
+                                        <Input label="Address" placeholder="123 Main St, Irvine, CA 92618"
+                                            value={addrForm.address}
+                                            onChange={(e) => setAddrForm({ ...addrForm, address: e.target.value })} />
+                                        <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--c-text-2)', cursor: 'pointer' }}>
+                                            <input type="checkbox" checked={addrForm.isDefault}
+                                                onChange={(e) => setAddrForm({ ...addrForm, isDefault: e.target.checked })} />
+                                            Use as my default address
+                                        </label>
+                                        <div style={{ display: 'flex', gap: 8 }}>
+                                            <Button size="sm" loading={addrSaving} onClick={handleAddrSave}>
+                                                {addrForm.id ? 'Save Address' : 'Add Address'}
+                                            </Button>
+                                            <Button variant="ghost" size="sm" onClick={() => setAddrForm(null)}>Cancel</Button>
+                                        </div>
+                                    </div>
+                                )}
+                            </>
+                        )}
                     </Card>
 
                     {/* Danger Zone */}

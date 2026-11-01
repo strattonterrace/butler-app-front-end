@@ -4,7 +4,8 @@ import { toast } from 'sonner'
 import { useAuthStore } from '@/store/authStore'
 import { useUIStore } from '@/store/uiStore'
 import { useEscapeKey, useIsMobile } from '@/hooks/useEdgeCases'
-import { Bell, List, Gear, SignOut, UserCircle } from '@phosphor-icons/react'
+import { List, Gear, SignOut, UserCircle } from '@phosphor-icons/react'
+import { NotificationBell } from './NotificationBell'
 
 const ROLE_COLORS = { client: '#3B82F6', operator: '#F59E0B', driver: '#22C55E', admin: '#8B5CF6' }
 const ROLE_BGS = { client: 'rgba(59,130,246,0.1)', operator: 'rgba(245,158,11,0.1)', driver: 'rgba(34,197,94,0.1)', admin: 'rgba(139,92,246,0.1)' }
@@ -54,17 +55,8 @@ export function TopBar() {
                     {role}
                 </span>
 
-                {/* Notification */}
-                <button style={{
-                    position: 'relative', padding: mobile ? 6 : 8, borderRadius: 8, border: 'none',
-                    cursor: 'pointer', backgroundColor: 'transparent', color: 'var(--c-text-2)',
-                }}>
-                    <Bell size={mobile ? 18 : 20} weight="regular" />
-                    <span style={{
-                        position: 'absolute', top: mobile ? 4 : 6, right: mobile ? 4 : 6, width: 7, height: 7,
-                        borderRadius: '50%', backgroundColor: '#C9A84C',
-                    }} />
-                </button>
+                {/* Notifications */}
+                <NotificationBell mobile={mobile} />
 
                 {/* User + Dropdown */}
                 <div style={{ position: 'relative', paddingLeft: mobile ? 8 : 16, borderLeft: '1px solid var(--c-border)' }}>
