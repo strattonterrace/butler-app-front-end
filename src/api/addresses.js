@@ -31,3 +31,6 @@ export const addressesApi = {
         await apiClient.delete(`/users/me/addresses/${id}/`)
     },
 }
+
+// Saved Addresses feature shipped Nov 1 2026 (UAT item #2).
+
