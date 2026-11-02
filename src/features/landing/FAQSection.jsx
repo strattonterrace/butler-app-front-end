@@ -21,7 +21,7 @@ const FAQS = [
     },
     {
         q: 'Who are the Butler drivers?',
-        a: "Every driver goes through a background check, vehicle inspection, and approval process before handling any request. You'll see their name, rating, and ETA before they pick anything up.",
+        a: "Every driver goes through an application and approval process before they can take requests. You'll see your driver's name and ETA before they pick anything up.",
     },
 ]
 

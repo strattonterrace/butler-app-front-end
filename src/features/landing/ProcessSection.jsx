@@ -269,9 +269,9 @@ export default function ProcessSection() {
                     overflow: 'hidden',
                 }}>
                     {[
-                        { num: '~24min', label: 'Average response time' },
-                        { num: '4.9★',   label: 'Driver rating average' },
-                        { num: '100%',   label: 'Orange County coverage' },
+                        { num: '6',      label: 'Services we handle' },
+                        { num: '$199',   label: 'Flat monthly membership' },
+                        { num: 'OC',     label: 'Orange County, launching now' },
                     ].map(({ num, label }) => (
                         <div key={label} style={{
                             background: 'var(--bg-surface)',

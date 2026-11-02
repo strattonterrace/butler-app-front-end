@@ -1,33 +1,23 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 
-const TESTIMONIALS = [
-    {
-        quote: "I haven't touched a grocery store in four months. Butler just handles it every week — I don't even think about it anymore.",
-        name: 'Sarah K.',
-        detail: 'Client since January · Newport Beach',
-    },
-    {
-        quote: "The dry cleaning alone was worth it. But knowing I can hand off literally anything that comes up during the week? That's what changed things.",
-        name: 'Marcus T.',
-        detail: 'Client since February · Irvine',
-    },
-    {
-        quote: "I work from home with two kids. Butler gives me back the hours I used to lose to errands. That's not a luxury — that's a necessity.",
-        name: 'Priya M.',
-        detail: 'Client since March · Laguna Beach',
-    },
+// Pre-launch service: no real customer reviews yet, so this section carries
+// the brand's promise (un-attributed value statements), NOT invented customer
+// testimonials. Add real, attributed testimonials here only once they're from
+// actual consenting members.
+const STATEMENTS = [
+    "Hand off the errands that eat your week — groceries, pharmacy, dry cleaning, returns. Just ask, and Butler handles it.",
+    "One membership instead of five delivery apps. Send a message, and whatever you need gets picked up or dropped off.",
+    "Built for Orange County from day one — a flat monthly membership designed to give you your time back.",
 ]
 
 export default function TestimonialsSection() {
     const [index, setIndex] = useState(0)
 
     useEffect(() => {
-        const id = setInterval(() => setIndex(i => (i + 1) % TESTIMONIALS.length), 5000)
+        const id = setInterval(() => setIndex(i => (i + 1) % STATEMENTS.length), 5000)
         return () => clearInterval(id)
     }, [])
-
-    const t = TESTIMONIALS[index]
 
     return (
         <section style={{
@@ -55,7 +45,7 @@ export default function TestimonialsSection() {
                     {String(index + 1).padStart(2, '0')}
                 </span>
 
-                <p className="t-label" style={{ marginBottom: 40 }}>What members say</p>
+                <p className="t-label" style={{ marginBottom: 40 }}>The Butler promise</p>
 
                 <AnimatePresence mode="wait">
                     <motion.div
@@ -73,52 +63,29 @@ export default function TestimonialsSection() {
                             opacity: 0.7,
                         }} />
 
-                        {/* Quote */}
-                        <blockquote style={{
+                        {/* Statement */}
+                        <p style={{
                             fontFamily: "'Instrument Serif', Georgia, serif",
                             fontSize: 'clamp(22px, 3vw, 38px)',
                             fontWeight: 400,
                             fontStyle: 'italic',
                             color: 'var(--text-primary)',
                             lineHeight: 1.4,
-                            marginBottom: 40,
                             maxWidth: 760,
+                            margin: 0,
                         }}>
-                            "{t.quote}"
-                        </blockquote>
-
-                        {/* Attribution */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                            <div style={{
-                                width: 36, height: 36,
-                                borderRadius: '50%',
-                                background: 'var(--bg-elevated)',
-                                border: '1px solid var(--border-default)',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                fontFamily: "'Instrument Serif', Georgia, serif",
-                                fontSize: 14,
-                                color: 'var(--gold)',
-                            }}>
-                                {t.name[0]}
-                            </div>
-                            <div>
-                                <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', fontFamily: "'Inter', sans-serif" }}>
-                                    {t.name}
-                                </p>
-                                <p style={{ fontSize: 12, color: 'var(--text-dim)', fontFamily: "'Inter', sans-serif", marginTop: 2 }}>
-                                    {t.detail}
-                                </p>
-                            </div>
-                        </div>
+                            {STATEMENTS[index]}
+                        </p>
                     </motion.div>
                 </AnimatePresence>
 
                 {/* Dot indicators */}
                 <div style={{ display: 'flex', gap: 8, marginTop: 48 }}>
-                    {TESTIMONIALS.map((_, i) => (
+                    {STATEMENTS.map((_, i) => (
                         <button
                             key={i}
                             onClick={() => setIndex(i)}
+                            aria-label={`Statement ${i + 1}`}
                             style={{
                                 width: i === index ? 24 : 6,
                                 height: 6,
