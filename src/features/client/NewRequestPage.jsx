@@ -12,8 +12,7 @@ import { Basket, Pill, TShirt, Package, ArrowUUpLeft, CookingPot, ArrowLeft, Che
 const SERVICE_ICONS = { grocery: Basket, pharmacy: Pill, dry_cleaning: TShirt, package: Package, retail_return: ArrowUUpLeft, food_pickup: CookingPot }
 const URGENCY_OPTIONS = [
     { value: 'asap', label: 'ASAP', desc: 'As soon as possible' },
-    { value: 'today', label: 'Today', desc: 'Before end of day' },
-    { value: 'scheduled', label: 'Scheduled', desc: 'Pick a date & time' },
+    { value: 'scheduled', label: 'Scheduled', desc: 'Pick your date & time' },
 ]
 
 export default function NewRequestPage() {
@@ -24,7 +23,7 @@ export default function NewRequestPage() {
     const [urgency, setUrgency] = useState('asap')
     const [submitted, setSubmitted] = useState(false)
     const [submitting, setSubmitting] = useState(false)
-    const [form, setForm] = useState({ title: '', description: '', pickup: '', dropoff: '', instructions: '', budget: '', scheduledDate: '', scheduledWindow: 'morning' })
+    const [form, setForm] = useState({ title: '', description: '', pickup: '', dropoff: '', instructions: '', scheduledDate: '', scheduledTime: '' })
     const update = (field) => (e) => setForm({ ...form, [field]: e.target.value })
 
     // Warn before leaving with unsaved form data
@@ -38,8 +37,8 @@ export default function NewRequestPage() {
             toast.error('Missing details', { description: 'Title, pickup and drop-off are required.' })
             return
         }
-        if (urgency === 'scheduled' && !form.scheduledDate) {
-            toast.error('Pick a date', { description: 'Scheduled requests need a date and time window.' })
+        if (urgency === 'scheduled' && (!form.scheduledDate || !form.scheduledTime)) {
+            toast.error('Pick a date and time', { description: 'Scheduled requests need both a date and a time.' })
             return
         }
         const payload = {
@@ -50,11 +49,10 @@ export default function NewRequestPage() {
             dropoffLocation: form.dropoff.trim(),
             urgency,
             specialInstructions: form.instructions.trim(),
-            estimatedBudget: form.budget.trim(),
         }
         if (urgency === 'scheduled') {
             payload.scheduledDate = form.scheduledDate
-            payload.scheduledWindow = form.scheduledWindow
+            payload.scheduledTime = form.scheduledTime
         }
         setSubmitting(true)
         try {
@@ -136,7 +134,7 @@ export default function NewRequestPage() {
                         {/* Urgency */}
                         <div className="page-section">
                             <p className="label-text" style={{ marginBottom: 12 }}>Urgency</p>
-                            <div className="grid-3col">
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                                 {URGENCY_OPTIONS.map(opt => {
                                     const active = urgency === opt.value
                                     return (
@@ -160,19 +158,7 @@ export default function NewRequestPage() {
                                         <Input type="date" label="Date" value={form.scheduledDate} onChange={update('scheduledDate')} />
                                     </div>
                                     <div style={{ flex: 1, minWidth: 160 }}>
-                                        <p className="label-text" style={{ marginBottom: 6 }}>Time Window</p>
-                                        <select value={form.scheduledWindow} onChange={update('scheduledWindow')}
-                                            style={{
-                                                width: '100%', height: 42, borderRadius: 10,
-                                                border: `1px solid ${isLight ? '#D4D4D4' : 'var(--c-border)'}`,
-                                                backgroundColor: isLight ? '#F4F4F5' : 'var(--c-input)',
-                                                padding: '0 12px', fontSize: 14, fontFamily: 'inherit',
-                                                color: isLight ? '#1C1917' : 'var(--c-text)', outline: 'none',
-                                            }}>
-                                            <option value="morning">Morning</option>
-                                            <option value="afternoon">Afternoon</option>
-                                            <option value="evening">Evening</option>
-                                        </select>
+                                        <Input type="time" label="Time" value={form.scheduledTime} onChange={update('scheduledTime')} />
                                     </div>
                                 </div>
                             )}
@@ -182,7 +168,6 @@ export default function NewRequestPage() {
                         <div className="page-section" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                             <p className="label-text">Additional</p>
                             <Textarea label="Special Instructions (optional)" placeholder="Any extra notes..." rows={3} value={form.instructions} onChange={update('instructions')} />
-                            <Input label="Estimated Budget (optional)" placeholder="e.g., $80-100" value={form.budget} onChange={update('budget')} />
                         </div>
 
                         {/* Submit */}

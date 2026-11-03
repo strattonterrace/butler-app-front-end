@@ -136,7 +136,7 @@ export default function RequestDetailPage() {
                         <p style={{ fontSize: 14, color: 'var(--c-text-2)', lineHeight: 1.7, marginBottom: 16 }}>{request.description}</p>
                         <InfoRow icon={MapPin} label="Pickup" value={request.pickupLocation} />
                         <InfoRow icon={MapPin} label="Drop-off" value={request.dropoffLocation} />
-                        <InfoRow icon={Clock} label="Urgency" value={request.urgency === 'scheduled' ? `Scheduled — ${request.scheduledDate} (${request.scheduledWindow})` : request.urgency.toUpperCase()} />
+                        <InfoRow icon={Clock} label="Urgency" value={request.urgency === 'scheduled' ? `Scheduled — ${request.scheduledDate}${request.scheduledTime ? ` at ${request.scheduledTime.slice(0, 5)}` : ''}` : request.urgency.toUpperCase()} />
                         <InfoRow icon={CalendarBlank} label="Submitted" value={formatDate(request.createdAt)} />
                         {request.estimatedBudget && <InfoRow icon={CalendarBlank} label="Budget" value={request.estimatedBudget} />}
                     </Card>
