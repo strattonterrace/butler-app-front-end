@@ -9,6 +9,7 @@ import ServicesSection from './ServicesSection'
 import GuidedFlow from './GuidedFlow'
 import TestimonialsSection from './TestimonialsSection'
 import ProcessSection from './ProcessSection'
+import SavingsCalculator from './SavingsCalculator'
 import TimeSection from './TimeSection'
 import FAQSection from './FAQSection'
 import FooterSection from './FooterSection'
@@ -123,6 +124,7 @@ export default function LandingPage() {
                 <TestimonialsSection />
                 <ProcessSection />
                 <TimeSection />
+                <SavingsCalculator />
                 <GuidedFlow onComplete={handleFlowComplete} />
                 <FAQSection />
                 <FooterSection />
