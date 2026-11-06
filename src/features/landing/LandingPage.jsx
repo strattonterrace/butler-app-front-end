@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { gsap } from 'gsap'
-import Lenis from 'lenis'
 import LandingNav from './LandingNav'
 import HeroSection from './HeroSection'
 import MarqueeStrip from './MarqueeStrip'
@@ -91,15 +90,6 @@ export default function LandingPage() {
         const params = new URLSearchParams(window.location.search)
         if (params.get('success') === 'true') setPhase('thankyou')
     }, [])
-
-    useEffect(() => {
-        if (phase !== 'landing') return
-        const lenis = new Lenis({ lerp: 0.085, smoothWheel: true })
-        let rafId
-        function raf(time) { lenis.raf(time); rafId = requestAnimationFrame(raf) }
-        rafId = requestAnimationFrame(raf)
-        return () => { cancelAnimationFrame(rafId); lenis.destroy() }
-    }, [phase])
 
     useEffect(() => {
         document.body.style.overflow = phase !== 'landing' ? 'hidden' : ''
