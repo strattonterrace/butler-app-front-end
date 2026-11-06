@@ -33,6 +33,7 @@ export default function StickyBar() {
                         left: '50%',
                         transform: 'translateX(-50%)',
                         zIndex: 90,
+                        maxWidth: 'calc(100vw - 20px)',
                         background: 'rgba(17,17,19,0.92)',
                         backdropFilter: 'blur(20px)',
                         WebkitBackdropFilter: 'blur(20px)',
@@ -54,7 +55,7 @@ export default function StickyBar() {
                         animation: 'pulse-dot 2s ease infinite',
                     }} />
 
-                    <span style={{
+                    <span className="sticky-cta-label" style={{
                         fontSize: 14,
                         fontFamily: "'Inter', sans-serif",
                         color: 'var(--text-muted)',

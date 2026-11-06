@@ -195,7 +195,7 @@ export default function ProcessSection() {
                 </div>
 
                 {/* Live visualization */}
-                <div style={{
+                <div className="proc-viz" style={{
                     background: 'var(--bg-surface)',
                     border: '1px solid var(--border-default)',
                     borderRadius: 20,
@@ -234,7 +234,7 @@ export default function ProcessSection() {
                     </div>
 
                     {/* Center arrow */}
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+                    <div className="proc-arrow" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
                         <div style={{ width: 1, height: 40, background: 'var(--border-subtle)' }} />
                         <div style={{
                             width: 36, height: 36, borderRadius: '50%',
@@ -259,7 +259,7 @@ export default function ProcessSection() {
                 </div>
 
                 {/* Stats strip */}
-                <div style={{
+                <div className="proc-stats" style={{
                     display: 'grid',
                     gridTemplateColumns: 'repeat(3, 1fr)',
                     gap: 1,

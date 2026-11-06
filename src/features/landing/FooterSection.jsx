@@ -52,7 +52,7 @@ export default function FooterSection() {
         <footer style={{ background: 'var(--bg-surface)', borderTop: '1px solid var(--border-subtle)' }}>
 
             {/* Top nav section */}
-            <div style={{
+            <div className="footer-top" style={{
                 maxWidth: 1060, margin: '0 auto',
                 padding: '72px 40px 64px',
                 display: 'grid',
@@ -81,7 +81,7 @@ export default function FooterSection() {
                 </div>
 
                 {/* Nav columns */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 32 }}>
+                <div className="footer-links" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 32 }}>
                     {NAV_COLS.map((col) => (
                         <div key={col.title}>
                             <p style={{

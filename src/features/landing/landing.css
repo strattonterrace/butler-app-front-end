@@ -603,3 +603,18 @@
   inset: 0;
   z-index: 50;
 }
+
+/* ── Responsive fixes (mobile) ── */
+@media (max-width: 768px) {
+  /* ProcessSection: stack the 3-column visualization, hide the center arrow */
+  .proc-viz { grid-template-columns: 1fr !important; }
+  .proc-arrow { display: none !important; }
+  /* Footer: stack brand over nav, cap link columns at two */
+  .footer-top { grid-template-columns: 1fr !important; gap: 40px !important; }
+  .footer-links { grid-template-columns: 1fr 1fr !important; }
+  /* Sticky bar: drop the long label so the pill fits a phone */
+  .sticky-cta-label { display: none !important; }
+}
+@media (max-width: 460px) {
+  .proc-stats { grid-template-columns: 1fr !important; }
+}

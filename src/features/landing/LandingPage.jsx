@@ -113,7 +113,6 @@ export default function LandingPage() {
 
     return (
         <div className="landing-root">
-            <GoldCursor />
             <StickyBar />
             <LandingNav />
 
